@@ -259,7 +259,7 @@ int XDmaPs_Start_Prog(XDmaPs *InstPtr, unsigned int Channel,
 		  int HoldDmaProg);
 int XDmaPs_Start_Program(XDmaPs *InstPtr, unsigned int Channel,
 		  XDmaPs_Cmd *Cmd,
-		  int HoldDmaProg);
+		  int HoldDmaProg, u32* DmaProg);
 int XDmaPs_Start_Transfer(XDmaPs *InstPtr, unsigned int Channel,
 		  XDmaPs_Cmd *Cmd,
 		  int HoldDmaProg, u32 DmaProg);

@@ -505,7 +505,7 @@ int main(void)
 			{
 				Checked[Channel] = 0;
 
-				Status = XDmaPs_Start_Program(&DmaInstance, Channel, DmaCmd_wr[j], 0);
+				Status = XDmaPs_Start_Program(&DmaInstance, Channel, DmaCmd_wr[j], 0, &DmaProg);
 				if (Status != XST_SUCCESS) {
 					printf("XDmaPs_Start_Transfer_Program error\n\r");
 					return XST_FAILURE;
@@ -517,20 +517,20 @@ int main(void)
 //				if (Status != XST_SUCCESS)
 //					printf("XDmaPs_Start_Transfer error\n\r");
 
-/*				if (DmaProg){
-					Status = XDmaPs_Exec_DMAGO(DmaInstance.Config.BaseAddress, Channel, (u32)DmaProg);
+				if (DmaProg){
+					Status = XDmaPs_Exec_DMAGO(DmaInstance.Config.BaseAddress, Channel, DmaProg);
 					if (Status != XST_SUCCESS)
-						printf("XDmaPs_Exec_DMAGO error\n\r");*/
+						printf("XDmaPs_Exec_DMAGO error\n\r");
 
 					while (Checked[Channel] == 0){ //wait DMAC to finish
 //						printf("Waiting DMA...\n\r");
 					}
-/*				}
+				}
 				else {
 					DmaInstance.Chans[Channel].DmaCmdToHw = NULL;
 					Status = XST_FAILURE;
 					xil_printf("Error: Aqui2\r\n");
-				}*/
+				}
 
 
 			}

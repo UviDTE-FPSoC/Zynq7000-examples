@@ -117,7 +117,7 @@ static void *XDmaPs_BufPool_Allocate(XDmaPs_ProgBuf *Pool);
 static int XDmaPs_BuildDmaProg(unsigned Channel, XDmaPs_Cmd *Cmd,
 				unsigned CacheLength);
 int XDmaPs_Start_Program(XDmaPs *InstPtr, unsigned int Channel, XDmaPs_Cmd *Cmd,
-		  int HoldDmaProg);
+		  int HoldDmaProg, u32* DmaProg);
 static void XDmaPs_Print_DmaProgBuf(char *Buf, int Length);
 
 
@@ -1499,10 +1499,10 @@ int XDmaPs_Start_Prog(XDmaPs *InstPtr, unsigned int Channel,
 /****************************************************************************/
 int XDmaPs_Start_Program(XDmaPs *InstPtr, unsigned int Channel,
 		  XDmaPs_Cmd *Cmd,
-		  int HoldDmaProg)
+		  int HoldDmaProg, u32* DmaProg)
 {
 	int Status;
-	u32 DmaProg = 0;
+//	u32 DmaProg = 0;
 	u32 Inten;
 
 	Xil_AssertNonvoid(InstPtr != NULL);
@@ -1523,11 +1523,11 @@ int XDmaPs_Start_Program(XDmaPs *InstPtr, unsigned int Channel,
 	InstPtr->Chans[Channel].HoldDmaProg = HoldDmaProg;
 
 	if (Cmd->UserDmaProg)
-		DmaProg = (u32)Cmd->UserDmaProg;
+		*DmaProg = (u32)Cmd->UserDmaProg;
 	else if (Cmd->GeneratedDmaProg)
-		DmaProg = (u32)Cmd->GeneratedDmaProg;
+		*DmaProg = (u32)Cmd->GeneratedDmaProg;
 
-	if (DmaProg) {
+	if (*DmaProg) {
 		/* enable the interrupt */
 		Inten = XDmaPs_ReadReg(InstPtr->Config.BaseAddress,
 					XDMAPS_INTEN_OFFSET);
@@ -1548,15 +1548,15 @@ int XDmaPs_Start_Program(XDmaPs *InstPtr, unsigned int Channel,
 					Cmd->BD.Length);
 		}
 
-		Status = XDmaPs_Exec_DMAGO(InstPtr->Config.BaseAddress,
+/*		Status = XDmaPs_Exec_DMAGO(InstPtr->Config.BaseAddress,
 					    Channel, DmaProg);
 /*		while (Checked[Channel] == 0){ //wait DMAC to finish
 								//printf("Waiting DMA...\n\r");
-		}*/
+		}
 		if (Status==0){
 //			xil_printf("XDmaPs_Exec_DMAGO OK\n\r");
 		}
-		else xil_printf("XDmaPs_Exec_DMAGO error\n\r");
+		else xil_printf("XDmaPs_Exec_DMAGO error\n\r");*/
 	}
 	else {
 		InstPtr->Chans[Channel].DmaCmdToHw = NULL;
