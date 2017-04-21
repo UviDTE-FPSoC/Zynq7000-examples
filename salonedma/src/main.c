@@ -67,6 +67,7 @@ int main(void)
 	//macros to define hardware directions
 	#define BRIDGE_BASE 0x40000000 //default start for HPS-FPGA High
 
+	#define NUM_DMA_PROGS	(2*1024*1024/ON_CHIP_MEMORY_SPAN)
 
 	printf("-----MEASURING FPGA-HPS BRIDGES SPEED IN BAREMETAL----\n\r\r");
 
@@ -105,8 +106,8 @@ int main(void)
 	char* wr_src;
 	int check;
 	int Status;
-	XDmaPs_Cmd *DmaCmd_wr[256];
-	for (j=0; j<256;j++){
+	XDmaPs_Cmd *DmaCmd_wr[NUM_DMA_PROGS];
+	for (j=0; j<NUM_DMA_PROGS;j++){
 		DmaCmd_wr[j]=(XDmaPs_Cmd*) malloc(sizeof(XDmaPs_Cmd));
 	}
 
@@ -117,9 +118,11 @@ int main(void)
 	XScuGic GicInstance;
 	XDmaPs_Cmd DmaCmd;
 	u32 DmaProg;
+	u32 DmaProgA[NUM_DMA_PROGS];
 	u32 BAdress;
 	int Checked[XDMAPS_CHANNELS_PER_DEV];
 	unsigned int Channel;
+
 
 	//-------------Memory pointers------------//
 	//FPGA On-Chip RAM
@@ -492,10 +495,24 @@ int main(void)
 			//write programs
 			XDmaSA_Program((void*)(&(wr_src[j*ON_CHIP_MEMORY_SPAN])), (void*)wr_dst, (size_t) data_in_one_operation, DmaCmd_wr[j]);
 		}
-
-
-		for(l = 0; l<REP_TESTS+2; l++)
+		Channel=0;
+		for (j=0; j<operation_loops; j++)
 		{
+//			printf("XDmaPs_Start_Program entro\n\r");
+			//generate array of bin
+			Status = XDmaPs_Start_Program(&DmaInstance, Channel, DmaCmd_wr[j], 0, &DmaProgA[j]);
+				if (Status != XST_SUCCESS) {
+					printf("XDmaPs_Start_Transfer_Program error\n\r");
+					return XST_FAILURE;
+				}
+			printf("XDmaPs_Start_Program saio1\n\r");
+		}
+		printf("XDmaPs_Start_Program saio2\n\r");
+
+
+
+//		for(l = 0; l<REP_TESTS+2; l++)
+//		{
 			Channel=0;
 			/* Set the Done interrupt handler */
 			XDmaPs_SetDoneHandler(&DmaInstance, Channel, DmaDoneHandler, (void *)Checked);
@@ -505,23 +522,23 @@ int main(void)
 			{
 				Checked[Channel] = 0;
 
-				Status = XDmaPs_Start_Program(&DmaInstance, Channel, DmaCmd_wr[j], 0, &DmaProg);
+/*			Status = XDmaPs_Start_Program(&DmaInstance, Channel, DmaCmd_wr[j], 0, &DmaProgA[j]);
 				if (Status != XST_SUCCESS) {
 					printf("XDmaPs_Start_Transfer_Program error\n\r");
 					return XST_FAILURE;
-				}
+				}*/
 
 			/* Incluir bucle para saturar memoria dinamica */
 
 //				Status = XDmaPs_Start_Transfer(&DmaInstance, Channel, DmaCmd_wr[j], 0, DmaProg);
 //				if (Status != XST_SUCCESS)
 //					printf("XDmaPs_Start_Transfer error\n\r");
-
+				DmaProg=DmaProgA[j];
 				if (DmaProg){
-					Status = XDmaPs_Exec_DMAGO(DmaInstance.Config.BaseAddress, Channel, DmaProg);
+					Status = XDmaPs_Exec_DMAGO(DmaInstance.Config.BaseAddress, Channel,DmaProg);
 					if (Status != XST_SUCCESS)
 						printf("XDmaPs_Exec_DMAGO error\n\r");
-
+					printf("XDmaPs_Exec_DMAGO despois\n\r");
 					while (Checked[Channel] == 0){ //wait DMAC to finish
 //						printf("Waiting DMA...\n\r");
 					}
@@ -538,7 +555,9 @@ int main(void)
 			if (overflow == 1){printf("Cycle counter overflow!! Program ended\n\r");return 1;}
 			//printf("PMU counter (ns): %lld \n\r", pmu_counter_ns);
 
-			if (l>=2) update_cumulative(&total_dma_wr, &min_dma_wr, &max_dma_wr, &variance_dma_wr, 0, pmu_counter_ns, clk_read_average);
+			update_cumulative(&total_dma_wr, &min_dma_wr, &max_dma_wr, &variance_dma_wr, 0, pmu_counter_ns, clk_read_average);
+
+//			if (l>=2) update_cumulative(&total_dma_wr, &min_dma_wr, &max_dma_wr, &variance_dma_wr, 0, pmu_counter_ns, clk_read_average);
 			//(We erase two first measurements because they are different from the others. Reason:Branch prediction misses when entering for loop)
 
 			//check the content of the data just read
@@ -549,7 +568,7 @@ int main(void)
 				printf("DMA source and destiny have different data on WR!! Program ended\n\r");return 1;
 			}
 //			printf("Check with data size %dB was OK\n\r", data_size[i]);
-		}
+//		}
 		printf("Check with data size %dB was OK aqui\n\r", data_size[i]);
 		printf("%d, %lld, %lld, %lld, %lld, %lld, %lld, %lld, %lld\n\r", data_size[i], total_dma_wr/REP_TESTS, min_dma_wr, max_dma_wr, variance(variance_dma_wr, total_dma_wr, REP_TESTS), total_dma_rd/REP_TESTS, min_dma_rd, max_dma_rd,  variance(variance_dma_rd, total_dma_rd, REP_TESTS) );
 

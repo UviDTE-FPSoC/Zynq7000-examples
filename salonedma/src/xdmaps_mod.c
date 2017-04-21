@@ -1549,8 +1549,8 @@ int XDmaPs_Start_Program(XDmaPs *InstPtr, unsigned int Channel,
 		}
 
 /*		Status = XDmaPs_Exec_DMAGO(InstPtr->Config.BaseAddress,
-					    Channel, DmaProg);
-/*		while (Checked[Channel] == 0){ //wait DMAC to finish
+					    Channel, *DmaProg);
+		while (Checked[Channel] == 0){ //wait DMAC to finish
 								//printf("Waiting DMA...\n\r");
 		}
 		if (Status==0){
