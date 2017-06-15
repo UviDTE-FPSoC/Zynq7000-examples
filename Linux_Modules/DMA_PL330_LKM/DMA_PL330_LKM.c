@@ -23,7 +23,6 @@
 #include "hwlib_socal_linux.h"
 #include "alt_dma.h"
 #include "alt_dma_common.h"
-#include "alt_address_space.h" //ACP configuration
 
 
 MODULE_LICENSE("GPL");              ///< The license type -- this affects runtime behavior
@@ -34,8 +33,8 @@ MODULE_VERSION("1.0");              ///< The version of the module
 //---------VARIABLES AND CONSTANTS FOR BUFFERS-----------------//
 //Buffers
 //HPS On-Chip RAM
-#define HPS_OCR_HADDRESS 0xFFFF0000 //Hardware address 
-#define HPS_OCR_SIZE	 0x10000    //Size in bytes=64kB
+#define HPS_OCR_HADDRESS 0xFFFC0000 //Hardware address 
+#define HPS_OCR_SIZE	 0x40000    //Size in bytes=256kB
 static void* hps_ocr_vaddress;       //virtual address 
 //Non cached DMAable physically contiguous buffer in main RAM
 static void* non_cached_mem_v; 	//virtual address, to be used in module
@@ -408,15 +407,6 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
   int error_count = 0;
   void* dma_transfer_src_h;//hardware address of the source buffer 
   void* dma_transfer_dst_h;//hardware address of the destiny buffer 
-  int i;
-  
-  /*if (use_acp==1) printk("offset=%d len=%d\n", (int) offset, (int)len);
-
-  if (use_acp==1){
-    printk("Cached buff before copy_from_user=[");
-    for (i=0; i<len+2; i++) printk("%d,",*((char*)(cached_mem_v)+i));
-    printk("]\n");
-  }*/
 
   //Copy data from user (application) space to a DMAble buffer
    if (use_acp == 0) //not use use_acp
@@ -428,12 +418,6 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
       printk(KERN_INFO "DMA LKM: Failed to copy %d characters from the user in write function\n", error_count);
       return -EFAULT;  // Failed -- return a bad address message (i.e. -14)
    }
-  
-  /*if (use_acp==1){
-    printk("Cached buff after copy_from_user=[");
-    for (i=0; i<len+2; i++) printk("%d,",*((char*)(cached_mem_v)+i));
-    printk("]\n");
-  }*/
   
   //Copy data from hardware buffer (FPGA) to the application memory
   if (prepare_microcode_in_open == 1)
@@ -504,8 +488,6 @@ static int dev_release(struct inode *inodep, struct file *filep){
 static int __init DMA_PL330_LKM_init(void){
    ALT_STATUS_CODE status;
    int result = 0;
-   const uint32_t ARUSER = 0b11111; //acpidmap:coherent cacheable reads
-   const uint32_t AWUSER = 0b11111; //acpidmap:coherent cacheable writes
    int var = 0; 
 
    printk(KERN_INFO "DMA LKM: Initializing module!!\n");
@@ -620,30 +602,6 @@ static int __init DMA_PL330_LKM_init(void){
    printk(KERN_INFO "DMA LKM: device successfully created in node: /dev/%s\n", DEVICE_NAME);
    //printk(KERN_INFO DEVICE_NAME);
    //printk(KERN_INFO "\n"); 
-
-  //--ACP configuration--//
-  //Do ioremap to be able to acess hw regs from inside the module
-  alt_acpidmap_iomap();
-  //print_acpidmap_regs();
-  result = 1;
-  //Set output ID3 for dynamic reads and ID4 for dynamic writes
-  status = alt_acp_id_map_dynamic_read_set(ALT_ACP_ID_OUT_DYNAM_ID_3);
-  if (status!=ALT_E_SUCCESS) result = 0;
-  status = alt_acp_id_map_dynamic_write_set(ALT_ACP_ID_OUT_DYNAM_ID_4);
-  if (status!=ALT_E_SUCCESS) result = 0;
-  //Configure the page and user write sideband signal options that are applied 
-  //to all write transactions that have their input IDs dynamically mapped.
-  status = alt_acp_id_map_dynamic_read_options_set(ALT_ACP_ID_MAP_PAGE_0, ARUSER);
-  if (status!=ALT_E_SUCCESS) result = 0;
-  status = alt_acp_id_map_dynamic_write_options_set(ALT_ACP_ID_MAP_PAGE_0, AWUSER);
-  if (status!=ALT_E_SUCCESS) result = 0;
-  //print_acpidmap_regs();
-  if (result==1)
-    printk(KERN_INFO "DMA LKM: ACP ID Mapper successfully configured.\n");
-  else
-    printk(KERN_INFO 
-      "DMA LKM: Some ERROR configuring ACP ID Mapper. ACP access may fail.\n");
-  alt_acpidmap_iounmap();
 
   //--Enable PMU from user space setting PMUSERENR.EN bit--//
   //read PMUSERENR

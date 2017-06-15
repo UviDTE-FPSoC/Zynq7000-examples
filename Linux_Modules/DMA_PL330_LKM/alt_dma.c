@@ -81,9 +81,8 @@
 //#else
   //#define dprintf  null_printf
 //#endif
-
-//UNCOMMENT TO ACTIVATE PRINTS - provides info about how dma prog is generated
 #define dprintf printk
+
 
 /*
  * SoCAL stand in for DMA Controller registers
@@ -102,41 +101,18 @@
 //We define ALT_DMASECURE_ADDR and ALT_RSTMGR_ADDR in 
 //hwlib_socal_linux.h
 //PL330 DMAC Hardware Details
-#define PL330_HADDRESS_SECURE 	0xffe01000	//hardware secure address
+#define PL330_HADDRESS_SECURE 	0xf8003000	//hardware secure address
 #define PL330_HSIZE		0x1000		//PL330 size=4kB 
-//Reset Manager Hardware Details
-#define RSTMGR_HADDRESS 	0xffd05000	//hardware secure address
-#define RSTMGR_HSIZE		0x1000		//rstmgr size=4kB 
-//System Manager Hardware Details
-#define SYSMGR_HADDRESS 	0xffd08000
-#define SYSMGR_HSIZE		0x4000		//sysmgr size = 16KB
 //virtual addresses for components
 static void* pl330_vaddress;
-static void* rstmgr_vaddress;
-static void* sysmgr_vaddress;
 //This makes alt_dma to use the virtual addresses
 #define ALT_DMASECURE_ADDR	pl330_vaddress 
-#define ALT_RSTMGR_ADDR		rstmgr_vaddress 
-#define ALT_SYSMGR_ADDR 	sysmgr_vaddress
 //--------------------------------------------------------------//
 //1. The fuction alt_dma_memory_to_memory_only_prepare_program() is added to the 
 //file. This function is the same as alt_dma_memory_to_memory without calling 
 //alt_dma_channel_exec in the last line of the function. This permits to separate 
 //preparation and execution of the DMA program, saving time in case the program
 //can be prepared before the transfer is to be done.
-
-//2.Define some macros
-#define ALT_DMA_RC_ON 0x00003800 //This define sets the ARCACHE and AWCACHE bits
-#define ALT_DMA_WC_ON 0x0E000000 //of CCR0 register of DMAC. It makes channel 0 of
-                        //DMAC to do cacheable accesses to L3 with its AXI master
-//
-//3.Change macros in some functions.  
-// ALT_DMA_CCR_OPT_SC_DEFAULT was changed by ALT_DMA_RC_ON and 
-// ALT_DMA_CCR_OPT_DC_DEFAULT was changed by ALT_DMA_WC_ON in all places of 
-// alt_dma_memory_to_memory_segment() where they appeared. 
-// alt_dma_memory_to_memory_segment() is used inside 
-// alt_dma_memory_to_memory_only_prepare_program() and inside
-// alt_dma_memory_to_memory() to prepare DMAC program in memory.
 //--------------------------------------------------------------//
 
 //#if defined(soc_a10)
@@ -364,51 +340,17 @@ ALT_STATUS_CODE alt_dma_iomap()
     if (pl330_vaddress == NULL) 
     {
       printk(KERN_INFO "DMA: error doing DMAC ioremap\n");
-      goto error_DMAC_ioremap;
+      return ALT_E_ERROR;
     }
     else
     {
-      printk(KERN_INFO "DMA: DMAC ioremap success\n");
-    }
-    
-    //Use ioremap to obtain a virtual address for Reset Manager
-    rstmgr_vaddress = ioremap(RSTMGR_HADDRESS, RSTMGR_HSIZE);
-    if (rstmgr_vaddress == NULL) 
-    {
-      printk(KERN_INFO "DMA: error doing RSTMGR ioremap\n");
-      goto error_RSTMGR_ioremap;
-    }
-    else
-    {
-      printk(KERN_INFO "DMA: RSTMGR ioremap success\n");
-    }
-    
-    //Use ioremap to obtain a virtual address for System Manager
-    sysmgr_vaddress = ioremap(SYSMGR_HADDRESS, SYSMGR_HSIZE);
-    if (sysmgr_vaddress == NULL) 
-    {
-      printk(KERN_INFO "DMA: error doing SYSMGR ioremap\n");
-      goto error_SYSMGR_ioremap;
-    }
-    else
-    {
-      printk(KERN_INFO "DMA: SYSMGR ioremap success\n");
-    }
-
-    //------Error recovery--------//
-    return ALT_E_SUCCESS;
-error_SYSMGR_ioremap:
-    iounmap(rstmgr_vaddress); //iounmap the RSTMGR
-error_RSTMGR_ioremap:
-    iounmap(pl330_vaddress); //iounmap the DMAC
-error_DMAC_ioremap: 
-    return ALT_E_ERROR;
+      	printk(KERN_INFO "DMA: DMAC ioremap success\n");
+ 	return ALT_E_SUCCESS;
+    }   
 }
 
 ALT_STATUS_CODE alt_dma_iounmap()
 {
-  iounmap(sysmgr_vaddress); //iounmap the RSTMGR
-  iounmap(rstmgr_vaddress); //iounmap the RSTMGR
   iounmap(pl330_vaddress); //iounmap the DMAC
   return ALT_E_SUCCESS;
 }
@@ -431,10 +373,6 @@ ALT_STATUS_CODE alt_dma_init(const ALT_DMA_CFG_t * dma_cfg)
     {
         g_dmaState.channel_info[i].flag = 0;
     }
-
-    // See if CAN is available on the system. //
-    g_dmaState.can_exist = ALT_SYSMGR_HPSINFO_CAN_GET(alt_read_word(ALT_SYSMGR_HPSINFO_ADDR))
-                        == ALT_SYSMGR_HPSINFO_CAN_E_CAN_AVAILABLE;
 
     // Handle FPGA / CAN muxing //
     for (i = 0; i < ARRAY_COUNT(dma_cfg->periph_mux); ++i)
@@ -488,8 +426,6 @@ ALT_STATUS_CODE alt_dma_init(const ALT_DMA_CFG_t * dma_cfg)
         }
     }
 
-    alt_write_word(ALT_SYSMGR_DMA_CTL_ADDR, dmactrl);
-
     for (i = 0; i < ARRAY_COUNT(dma_cfg->periph_sec); ++i)
     {
         // Default is Secure state. //
@@ -506,11 +442,9 @@ ALT_STATUS_CODE alt_dma_init(const ALT_DMA_CFG_t * dma_cfg)
         }
     }
 
-    alt_write_word(ALT_SYSMGR_DMA_PERSECURITY_ADDR, dmapersecurity);
-
     // Take DMA out of reset. //
 
-    alt_clrbits_word(ALT_RSTMGR_PERMODRST_ADDR, ALT_RSTMGR_PERMODRST_DMA_SET_MSK);
+    //alt_clrbits_word(ALT_RSTMGR_PERMODRST_ADDR, ALT_RSTMGR_PERMODRST_DMA_SET_MSK);
 
 #elif defined(soc_a10)
     printk("arria10 selected\n");
@@ -647,7 +581,7 @@ ALT_STATUS_CODE alt_dma_uninit(void)
 
 #if defined(soc_cv_av)
 
-    alt_setbits_word(ALT_RSTMGR_PERMODRST_ADDR, ALT_RSTMGR_PERMODRST_DMA_SET_MSK);
+    //alt_setbits_word(ALT_RSTMGR_PERMODRST_ADDR, ALT_RSTMGR_PERMODRST_DMA_SET_MSK);
 
 #elif defined(soc_a10)
 
@@ -1285,14 +1219,12 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
                                               | ALT_DMA_CCR_OPT_SS8
                                               | ALT_DMA_CCR_OPT_SA_DEFAULT
                                               | ALT_DMA_CCR_OPT_SP_DEFAULT
-                                              //| ALT_DMA_CCR_OPT_SC(7)
-                                              | ALT_DMA_RC_ON
+                                              | ALT_DMA_CCR_OPT_SC(7)
                                               | ((aligncount - 1) << 18) // DB //
                                               | ALT_DMA_CCR_OPT_DS8
                                               | ALT_DMA_CCR_OPT_DA_DEFAULT
                                               | ALT_DMA_CCR_OPT_DP_DEFAULT
-                                              //| ALT_DMA_CCR_OPT_DC(7)
-                                              | ALT_DMA_WC_ON
+                                              | ALT_DMA_CCR_OPT_DC(7)
                                               | ALT_DMA_CCR_OPT_ES_DEFAULT
                                             )
                 );
@@ -1318,9 +1250,8 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
     sizeleft &= 0x7;
 
     //dprintf("DMA[M->M][seg]: Total Main 8-byte burst size transfer(s): %" PRIu32 ".\n", burstcount);
-    #ifdef PRINT_K
     dprintf("DMA[M->M][seg]: Total Main 8-byte burst size transfer(s): %u.\n", burstcount);
-    #endif
+    
     // Determine how many 16 length bursts can be done //
 
     if (burstcount >> 4)
@@ -1330,10 +1261,9 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
 
         //dprintf("DMA[M->M][seg]:   Number of 16 burst length 8-byte transfer(s): %" PRIu32 ".\n", length16burstcount);
         //dprintf("DMA[M->M][seg]:   Number of remaining 8-byte transfer(s):       %" PRIu32 ".\n", burstcount);
-	#ifdef PRINT_K
-    dprintf("DMA[M->M][seg]:   Number of 16 burst length 8-byte transfer(s): %u .\n", length16burstcount);
+	dprintf("DMA[M->M][seg]:   Number of 16 burst length 8-byte transfer(s): %u .\n", length16burstcount);
         dprintf("DMA[M->M][seg]:   Number of remaining 8-byte transfer(s):       %u .\n", burstcount);
-	#endif
+	
 	
         // Program in the following parameters:
         //  - SS64  : Source      burst size of 8-byte
@@ -1351,14 +1281,12 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
                                               | ALT_DMA_CCR_OPT_SS64
                                               | ALT_DMA_CCR_OPT_SA_DEFAULT
                                               | ALT_DMA_CCR_OPT_SP_DEFAULT
-                                              //| ALT_DMA_CCR_OPT_SC(7)
-                                              | ALT_DMA_RC_ON
+                                              | ALT_DMA_CCR_OPT_SC(7)
                                               | ALT_DMA_CCR_OPT_DB16
                                               | ALT_DMA_CCR_OPT_DS64
                                               | ALT_DMA_CCR_OPT_DA_DEFAULT
                                               | ALT_DMA_CCR_OPT_DP_DEFAULT
-                                             // | ALT_DMA_CCR_OPT_DC(7)
-                                              | ALT_DMA_WC_ON
+                                              | ALT_DMA_CCR_OPT_DC(7)
                                               | ALT_DMA_CCR_OPT_ES_DEFAULT
                                             )
                 );
@@ -1375,9 +1303,8 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
             length16burstcount -= loopcount;
 
             //dprintf("DMA[M->M][seg]:   Looping %" PRIu32 "x 16 burst length 8-byte transfer(s).\n", loopcount);
-	    #ifdef PRINT_K
-        dprintf("DMA[M->M][seg]:   Looping %x 16 burst length 8-byte transfer(s).\n", loopcount);
-	    #endif
+	    dprintf("DMA[M->M][seg]:   Looping %x 16 burst length 8-byte transfer(s).\n", loopcount);
+	    
             if ((status == ALT_E_SUCCESS) && (loopcount > 1))
             {
                 status = alt_dma_program_DMALP(program, loopcount);
@@ -1420,14 +1347,12 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
                                               | ALT_DMA_CCR_OPT_SS64
                                               | ALT_DMA_CCR_OPT_SA_DEFAULT
                                               | ALT_DMA_CCR_OPT_SP_DEFAULT
-                                              //| ALT_DMA_CCR_OPT_SC(7)
-                                              | ALT_DMA_RC_ON
+                                              | ALT_DMA_CCR_OPT_SC(7)
                                               | ((burstcount - 1) << 18) // DB //
                                               | ALT_DMA_CCR_OPT_DS64
                                               | ALT_DMA_CCR_OPT_DA_DEFAULT
                                               | ALT_DMA_CCR_OPT_DP_DEFAULT
-                                              //| ALT_DMA_CCR_OPT_DC(7)
-                                              | ALT_DMA_WC_ON
+                                              | ALT_DMA_CCR_OPT_DC(7)
                                               | ALT_DMA_CCR_OPT_ES_DEFAULT
                                             )
                 );
@@ -1453,9 +1378,9 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
             // This is determined by how many remaining data is in the MFIFO after
             // the burst(s) have completed. //
             int correctcount = (segdstpa + (8 - (segsrcpa & 0x7))) & 0x7;
-            #ifdef PRINT_K
+
             dprintf("DMA[M->M][seg]: Total correction 1-byte burst size transfer(s): %u.\n", correctcount);
-            #endif
+
             // Program in the following parameters:
             //  - SS8   : Source      burst size of 1-byte
             //  - DS8   : Destination burst size of 1-byte
@@ -1470,14 +1395,12 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
                                               | ALT_DMA_CCR_OPT_SS8
                                               | ALT_DMA_CCR_OPT_SA_DEFAULT
                                               | ALT_DMA_CCR_OPT_SP_DEFAULT
-                                              //| ALT_DMA_CCR_OPT_SC(7)
-                                              | ALT_DMA_RC_ON
+                                              | ALT_DMA_CCR_OPT_SC(7)
                                               | ((correctcount - 1) << 18) // DB //
                                               | ALT_DMA_CCR_OPT_DS8
                                               | ALT_DMA_CCR_OPT_DA_DEFAULT
                                               | ALT_DMA_CCR_OPT_DP_DEFAULT
-                                              //| ALT_DMA_CCR_OPT_DC(7)
-                                              | ALT_DMA_WC_ON
+                                              | ALT_DMA_CCR_OPT_DC(7)
                                               | ALT_DMA_CCR_OPT_ES_DEFAULT
                                             )
                 );
@@ -1492,9 +1415,8 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
 
     if (sizeleft)
     {
-        #ifdef PRINT_K
         dprintf("DMA[M->M][seg]: Total post 1-byte burst size transfer(s): %u.\n", sizeleft);
-        #endif
+
         // Program in the following parameters:
         //  - SS8   : Source      burst size of 1-byte)
         //  - DS8   : Destination burst size of 1-byte)
@@ -1511,14 +1433,12 @@ static ALT_STATUS_CODE alt_dma_memory_to_memory_segment(ALT_DMA_PROGRAM_t * prog
                                               | ALT_DMA_CCR_OPT_SS8
                                               | ALT_DMA_CCR_OPT_SA_DEFAULT
                                               | ALT_DMA_CCR_OPT_SP_DEFAULT
-                                              //| ALT_DMA_CCR_OPT_SC(7)
-                                              | ALT_DMA_RC_ON
+                                              | ALT_DMA_CCR_OPT_SC(7)
                                               | ((sizeleft - 1) << 18) // DB //
                                               | ALT_DMA_CCR_OPT_DS8
                                               | ALT_DMA_CCR_OPT_DA_DEFAULT
                                               | ALT_DMA_CCR_OPT_DP_DEFAULT
-                                              //| ALT_DMA_CCR_OPT_DC(7)
-                                              | ALT_DMA_WC_ON
+                                              | ALT_DMA_CCR_OPT_DC(7)
                                               | ALT_DMA_CCR_OPT_ES_DEFAULT
                                             )
                 );
@@ -1715,9 +1635,7 @@ ALT_STATUS_CODE alt_dma_memory_to_memory(ALT_DMA_CHANNEL_t channel,
 
         if (status == ALT_E_SUCCESS)
         {
-            #ifdef PRINT_K
             dprintf("DMA[M->M]: Adding event ...\n");
-            #endif
             status = alt_dma_program_DMASEV(programv, evt);
         }
     }
@@ -1733,7 +1651,9 @@ ALT_STATUS_CODE alt_dma_memory_to_memory(ALT_DMA_CHANNEL_t channel,
     {
         // Do not report the status for the clear operation. A failure should be
         // reported regardless of if the clear is successful. //
+	#ifdef PRINT_K	
 	printk("Clear the program\n");
+	#endif
         alt_dma_program_clear(programv);
         return status;
     }
@@ -1921,10 +1841,8 @@ ALT_STATUS_CODE alt_dma_memory_to_memory_only_prepare_program(ALT_DMA_CHANNEL_t 
 
         if (status == ALT_E_SUCCESS)
         {
-            #ifdef PRINT_K
             dprintf("DMA[M->M]: Adding event ...\n");
             status = alt_dma_program_DMASEV(programv, evt);
-            #endif
         }
     }
 
@@ -1939,8 +1857,10 @@ ALT_STATUS_CODE alt_dma_memory_to_memory_only_prepare_program(ALT_DMA_CHANNEL_t 
     {
         // Do not report the status for the clear operation. A failure should be
         // reported regardless of if the clear is successful. //
+	#ifdef PRINT_K	
 	printk("Clear the program\n");
-        alt_dma_program_clear(programv);
+        #endif
+	alt_dma_program_clear(programv);
         return status;
     }
 

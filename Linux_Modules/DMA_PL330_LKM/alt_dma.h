@@ -83,9 +83,6 @@
 //#define ALT_DMA_PERIPH_PROVISION_I2C_SUPPORT (1)
 //#endif
 
-#if ALT_DMA_PERIPH_PROVISION_I2C_SUPPORT
-#include "alt_i2c.h"
-#endif
 
 /*!
  * @}
@@ -387,12 +384,12 @@ ALT_DMA_CFG_t;
  * Remap DMAC and RSTMGR to have virtualo addresses for them.
  * This is needed to access these peripherals from kernel space.
  * */
-ALT_STATUS_CODE alt_dma_iomap();
+ALT_STATUS_CODE alt_dma_iomap(void);
 
 /*!
  * Unmap DMAC and RSTMGR 
  * */
-ALT_STATUS_CODE alt_dma_iounmap();
+ALT_STATUS_CODE alt_dma_iounmap(void);
 
 
 /*!
@@ -735,45 +732,6 @@ ALT_STATUS_CODE alt_dma_int_clear(ALT_DMA_EVENT_t irq_num);
  * @{
  */
 
-#if ALT_DMA_PERIPH_PROVISION_I2C_SUPPORT
-    
-/*!
- * This type defines the structure used by alt_dma_memory_to_periph() and
- * alt_dma_periph_to_memory() for the \e periph_info pointer when transfering
- * to or from I2C peripherals. The fields of this structure should be filled
- * out appropriately then used as in those functions.
- *
- * It is necessary for the contents of the structure to be undisturbed while
- * the DMA transfer is in progress. Thus if it is allocated on the stack, it
- * will need to be in scope until the DMA operation completes or fails.
- */
-typedef struct ALT_DMA_PERIPH_INFO_I2C_s
-{
-    /*!
-     * The I2C device handle.
-     */
-    ALT_I2C_DEV_t * i2c_dev;
-
-    /*!
-     * When the I2C controller is configured as bus master, this indicates that
-     * the transfer should issue a RESTART at the start of the transfer. When
-     * configured as bus slave, this parameter is ignored. */
-    bool issue_restart;
-
-    /*!
-     * When the I2C controller is configured as bus master, this indicates that
-     * the transfer should issue a STOP at the end of the transfer. When
-     * configured as bus slave, this parameter is ignored. */
-    bool issue_stop;
-
-    /*!
-     * Scratch space used by the I2C DMA implementation.
-     */
-    uint32_t scratch[4];
-}
-ALT_DMA_PERIPH_INFO_I2C_t;
-
-#endif
 
 /*!
  * Uses the DMA engine to asynchronously copy the specified memory from the

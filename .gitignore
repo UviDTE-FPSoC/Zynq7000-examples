@@ -1,0 +1,22 @@
+#Files after compilation not to be uploaded to the repository
+
+#modules
+
+**.mod
+**.mod.o
+**.mod.c
+**.cmd
+**-swp
+**symvers
+**.order
+**tmp_versions/**
+**~
+**.o
+
+#baremetal
+
+**/Baremetal/*.axf** 
+**/Baremetal/*.o
+**/Baremetal/*.bin** 
+
+
