@@ -33,7 +33,7 @@ MODULE_VERSION("1.0");              ///< The version of the module
 //---------VARIABLES AND CONSTANTS FOR BUFFERS-----------------//
 //Buffers
 //HPS On-Chip RAM
-#define HPS_OCR_HADDRESS 0xFFFC0000 //Hardware address 
+#define HPS_OCR_HADDRESS 0xF800C000 //Hardware address 
 #define HPS_OCR_SIZE	 0x40000    //Size in bytes=256kB
 static void* hps_ocr_vaddress;       //virtual address 
 //Non cached DMAable physically contiguous buffer in main RAM
