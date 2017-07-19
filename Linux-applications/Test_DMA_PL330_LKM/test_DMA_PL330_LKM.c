@@ -19,7 +19,7 @@
 #define HW_REGS_MASK ( HW_REGS_SPAN - 1 ) //Mask for mmap
 
 //MACROS TO CONTROL THE TRANSFER
-#define DMA_TRANSFER_SIZE 	32
+#define DMA_TRANSFER_SIZE 	4
 //DMA_BUFF_PADD:
 //physical address of the buffer used when reading and writing using dma driver
 //In this address there should be a memory with enough space to do the transfer
