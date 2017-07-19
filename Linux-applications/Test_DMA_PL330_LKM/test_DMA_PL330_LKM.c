@@ -8,25 +8,27 @@
 #include <stdint.h>
 
 //Constants to do mmap and get access to FPGA peripherals
-#define HPS_FPGA_BRIDGE_BASE 0xC0000000
-#define HW_REGS_BASE ( HPS_FPGA_BRIDGE_BASE )
-#define HW_REGS_SPAN ( 0x04000000 )
-#define HW_REGS_MASK ( HW_REGS_SPAN - 1 )
-#define ON_CHIP_MEMORY_BASE 0 //FPGA On-Chip RAM address relative to H2F bridge
+//FPGA On-Chip RAM
+#define HPS_FPGA_BRIDGE_BASE 0x80000000 //Base address of GP Port 1
+#define ON_CHIP_MEMORY_BASE_REL 0x27000000 //address relative to H2F bridge
+#define ON_CHIP_MEMORY_BASE (HPS_FPGA_BRIDGE_BASE + ON_CHIP_MEMORY_BASE_REL)
+#define ON_CHIP_MEMORY_SIZE 0x10000 //64KB
+//mmap
+#define HW_REGS_BASE ( ON_CHIP_MEMORY_BASE ) //Base of the mmap
+#define HW_REGS_SPAN (ON_CHIP_MEMORY_SIZE ) //Spam of the mmap
+#define HW_REGS_MASK ( HW_REGS_SPAN - 1 ) //Mask for mmap
 
 //MACROS TO CONTROL THE TRANSFER
 #define DMA_TRANSFER_SIZE 	32
-#define USE_ACP			1  //0 do not use acp, 1 use acp
 //DMA_BUFF_PADD:
 //physical address of the buffer used when reading and writing using dma driver
-//in this case we set 0xC0000000, the beginning of the HPS-FPGA BRIDGE
 //In this address there should be a memory with enough space to do the transfer
-#define DMA_BUFF_PADD	(HPS_FPGA_BRIDGE_BASE + ON_CHIP_MEMORY_BASE)
-//PREPARE_MICROCODE_WHEN_OPEN: 
+#define DMA_BUFF_PADD	(ON_CHIP_MEMORY_BASE)
+//PREPARE_MICROCODE_WHEN_OPEN:
 //0 prepare microcode when write or read
-//1 prepare microcode when open. It saves microcode preparation time 
+//1 prepare microcode when open. It saves microcode preparation time
 //later when calling read and write
-#define PREPARE_MICROCODE_WHEN_OPEN 0 
+#define PREPARE_MICROCODE_WHEN_OPEN 0
 
 
 void printbuff(char* buff, int size)
@@ -44,11 +46,11 @@ void printbuff(char* buff, int size)
 
 int main() {
   int i;
-    
+
 
   //-------GENERATE ADRESSES TO ACCESS FPGA MEMORY FROM PROCESSOR---------//
-  // map the address space for the LED registers into user space so we can 
-  //interact with them. we'll actually map in the entire CSR span of the HPS 
+  // map the address space for the LED registers into user space so we can
+  //interact with them. we'll actually map in the entire CSR span of the HPS
   //since we want to access various registers within that span
   void *virtual_base;
   int fd;
@@ -57,7 +59,7 @@ int main() {
 	  return( 1 );
   }
 
-  virtual_base = mmap( NULL, HW_REGS_SPAN, ( PROT_READ | PROT_WRITE ), 
+  virtual_base = mmap( NULL, HW_REGS_SPAN, ( PROT_READ | PROT_WRITE ),
     MAP_SHARED, fd, HW_REGS_BASE );
 
   if( virtual_base == MAP_FAILED ) {
@@ -67,8 +69,8 @@ int main() {
   }
 
   //virtual address of the FPGA buffer
-  void *on_chip_RAM_vaddr_void = virtual_base 
-  + ((unsigned long)(ON_CHIP_MEMORY_BASE) & (unsigned long)( HW_REGS_MASK ));
+  void *on_chip_RAM_vaddr_void = virtual_base
+  + ((unsigned long)(ON_CHIP_MEMORY_BASE-HW_REGS_BASE) & (unsigned long)( HW_REGS_MASK ));
   uint8_t* on_chip_RAM_vaddr = (uint8_t *) on_chip_RAM_vaddr_void;
 
 
@@ -86,7 +88,7 @@ int main() {
     ocr_ptr++;
   }
   printf("Check On-Chip RAM OK\n");
-  
+
 
   //Reset all memory
   ocr_ptr = on_chip_RAM_vaddr;
@@ -101,13 +103,13 @@ int main() {
     ocr_ptr++;
   }
   printf("Reset On-Chip RAM OK\n");
- 
+
 
   //----------------CONFIGURE THE DMA DRIVER THROUGH SYSFS---------------//
   //Configure the driver through sysfs
   int f_sysfs;
   char d[14];
-  
+
   printf("\nConfig. DMA_PL330 module using sysfs entries in /sys/dma_pl330\n");
   sprintf(d, "%u", (uint32_t) DMA_BUFF_PADD);
   f_sysfs = open("/sys/dma_pl330/pl330_lkm_attrs/dma_buff_padd", O_WRONLY);
@@ -116,19 +118,10 @@ int main() {
     return errno;
   }
   write (f_sysfs, &d, 14);
-  close(f_sysfs);	
-  
-  sprintf(d, "%d", (int) USE_ACP);
-  f_sysfs = open("/sys/dma_pl330/pl330_lkm_attrs/use_acp", O_WRONLY);
-  if (f_sysfs < 0){
-    printf("Failed to open sysfs for use_acp.\n");
-    return errno;
-  }
-  write (f_sysfs, &d, 14);
   close(f_sysfs);
-  
+
   sprintf(d, "%d", (int) PREPARE_MICROCODE_WHEN_OPEN);
-  f_sysfs = open("/sys/dma_pl330/pl330_lkm_attrs/prepare_microcode_in_open", 
+  f_sysfs = open("/sys/dma_pl330/pl330_lkm_attrs/prepare_microcode_in_open",
     O_WRONLY);
   if (f_sysfs < 0){
     printf("Failed to open sysfs for prepare_microcode_in_open.\n");
@@ -136,7 +129,7 @@ int main() {
   }
   write (f_sysfs, &d,14);
   close(f_sysfs);
-  
+
   sprintf(d, "%d", (int) DMA_TRANSFER_SIZE);
   f_sysfs = open("/sys/dma_pl330/pl330_lkm_attrs/dma_transfer_size", O_WRONLY);
   if (f_sysfs < 0){
@@ -148,23 +141,22 @@ int main() {
   printf("Sysfs configuration correct.\n");
   printf("Sysfs values:");
   printf(" dma_buff_p:0x%x,", (unsigned int) DMA_BUFF_PADD);
-  printf(" use_acp:%d,", USE_ACP);
   printf(" prepare_microcode_in_open:%d,", PREPARE_MICROCODE_WHEN_OPEN);
   printf(" dma_transfer_size:%d\n", DMA_TRANSFER_SIZE);
 
-  
+
   //-----------------WRITE THE FPGA USING THE DMA DRIVER-----------------//
   //Fill uP buffer and show uP and FPGA buffers
-  printf("\nWRITE: Copy a %d Bytes from uP to FPGA on physical address %x\n", 
-    (int) DMA_TRANSFER_SIZE, (unsigned int) DMA_BUFF_PADD); 
+  printf("\nWRITE: Copy a %d Bytes from uP to FPGA on physical address %x\n",
+  (int) DMA_TRANSFER_SIZE, (unsigned int) DMA_BUFF_PADD);
   char buffer[DMA_TRANSFER_SIZE];
   for (i=0; i<DMA_TRANSFER_SIZE;i++) buffer[i] = 2;
-  printf("uP   buff before WR = "); 
+  printf("uP   buff before WR = ");
   printbuff(buffer, DMA_TRANSFER_SIZE);
-  printf("FPGA buff before WR = "); 
+  printf("FPGA buff before WR = ");
   printbuff((char*)on_chip_RAM_vaddr, DMA_TRANSFER_SIZE);
 
-  //Write uP fuffer to FPGA
+  //Write uP buffer to FPGA
   printf("Writing on /dev/dma_pl330...\n");
   int f=open("/dev/dma_pl330",O_RDWR);
   if (f < 0){
@@ -177,11 +169,11 @@ int main() {
 	  return errno;
 	}
 	close(f);
-	
+
   //print the result of the Write
-  printf("uP   buff after WR = "); 
+  printf("uP   buff after WR = ");
   printbuff(buffer, DMA_TRANSFER_SIZE);
-  printf("FPGA buff after WR = "); 
+  printf("FPGA buff after WR = ");
   printbuff((char*)on_chip_RAM_vaddr, DMA_TRANSFER_SIZE);
 	if(memcmp((void*)buffer, on_chip_RAM_vaddr_void,(size_t)DMA_TRANSFER_SIZE)==0)
     printf("Write Successful!\n");
@@ -190,12 +182,12 @@ int main() {
 
   //-------------------READ THE FPGA USING THE DMA DRIVER-----------------//
    //Fill uP buffer and show uP and FPGA buffers
-  printf("\nREAD: Copy a %d Bytes from FPGA on physical address %x to uP\n", 
-    (int) DMA_TRANSFER_SIZE, (unsigned int) DMA_BUFF_PADD); 
+  printf("\nREAD: Copy a %d Bytes from FPGA on physical address %x to uP\n",
+    (int) DMA_TRANSFER_SIZE, (unsigned int) DMA_BUFF_PADD);
   for (i=0; i<DMA_TRANSFER_SIZE;i++) buffer[i] = 3;
-  printf("uP   buff before RD = "); 
+  printf("uP   buff before RD = ");
   printbuff(buffer, DMA_TRANSFER_SIZE);
-  printf("FPGA buff before RD = "); 
+  printf("FPGA buff before RD = ");
   printbuff((char*)on_chip_RAM_vaddr, DMA_TRANSFER_SIZE);
 
   //Read from FPGA to uP
@@ -211,11 +203,11 @@ int main() {
     return errno;
   }
   close(f);
-  
+
   //print the result of the Read
-  printf("uP   buff after RD = "); 
+  printf("uP   buff after RD = ");
   printbuff(buffer, DMA_TRANSFER_SIZE);
-  printf("FPGA buff after RD = "); 
+  printf("FPGA buff after RD = ");
   printbuff((char*)on_chip_RAM_vaddr, DMA_TRANSFER_SIZE);
   if(memcmp((void*)buffer, on_chip_RAM_vaddr_void,(size_t)DMA_TRANSFER_SIZE)==0)
     printf("Read Successful!\n");
