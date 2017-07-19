@@ -28,7 +28,7 @@
 //0 prepare microcode when write or read
 //1 prepare microcode when open. It saves microcode preparation time
 //later when calling read and write
-#define PREPARE_MICROCODE_WHEN_OPEN 0
+#define PREPARE_MICROCODE_WHEN_OPEN 1
 
 
 void printbuff(char* buff, int size)
@@ -163,6 +163,7 @@ int main() {
     perror("Failed to open /dev/dma_pl330 on write...");
     return errno;
   }
+
 	int ret = write(f, buffer, DMA_TRANSFER_SIZE);
 	if (ret < 0){
 	  perror("Failed to write the message to the device.");
@@ -181,7 +182,7 @@ int main() {
     printf("Write Error. Buffers are not equal\n");
 
   //-------------------READ THE FPGA USING THE DMA DRIVER-----------------//
-   //Fill uP buffer and show uP and FPGA buffers
+  //Fill uP buffer and show uP and FPGA buffers
   printf("\nREAD: Copy a %d Bytes from FPGA on physical address %x to uP\n",
     (int) DMA_TRANSFER_SIZE, (unsigned int) DMA_BUFF_PADD);
   for (i=0; i<DMA_TRANSFER_SIZE;i++) buffer[i] = 3;
