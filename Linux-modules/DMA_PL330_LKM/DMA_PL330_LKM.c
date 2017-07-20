@@ -32,14 +32,14 @@ MODULE_VERSION("1.0");///< The version of the module
 
 //---------VARIABLES AND CONSTANTS FOR BUFFERS-----------------//
 //Buffers
-//HPS On-Chip RAM
-#define HPS_OCR_HADDRESS 0xA7000040 //Hardware address
-#define HPS_OCR_SIZE	 0x40000    //Size in bytes=256kB
-static void* hps_ocr_vaddress;       //virtual address
 //Non cached DMAable physically contiguous buffer in main RAM
 static void* non_cached_mem_v; 	//virtual address, to be used in module
 static dma_addr_t non_cached_mem_h; //hardware address, to be used in hardware
 #define NON_CACHED_MEM_SIZE (2*1024*1024) //Size. Max using dma_alloc_coherent in Angstrom and CycloneVSoC is 4MB
+//Non cached buffer to store the DMA Controller microcode
+static void* DMAC_microcode_v; 	//virtual address, to be used in module
+static dma_addr_t DMAC_microcode_h; //hardware address, to be used in hardware
+#define DMA_MICROCODE_SIZE 256 //microcode is usually between 20B and 30B
 
 //-------------VARIABLES TO DO DMA TRANSFER----------------//
 //IMPORTANT!!!!!
@@ -56,11 +56,11 @@ static dma_addr_t non_cached_mem_h; //hardware address, to be used in hardware
 // FPGA-OCR with the start of the HPS-FPGA bridge that is GB aligned so we ensure a
 // problem related to this arises.
 //DMAC microcode program virtual and hardware address for writing the FPGA
-#define DMA_PROG_WR_V (hps_ocr_vaddress+16)
-#define DMA_PROG_WR_H (HPS_OCR_HADDRESS+16)
+#define DMA_PROG_WR_V (DMAC_microcode_v+16)
+#define DMA_PROG_WR_H (DMAC_microcode_h+16)
 //DMAC microcode program virtual and hardware address for reading the FPGA
-#define DMA_PROG_RD_V (hps_ocr_vaddress+256+16)
-#define DMA_PROG_RD_H (HPS_OCR_HADDRESS+256+16)
+#define DMA_PROG_RD_V (DMAC_microcode_v+DMA_MICROCODE_SIZE+16)
+#define DMA_PROG_RD_H (DMAC_microcode_h+DMA_MICROCODE_SIZE+16)
 //dma channel to be used in transfers
 static ALT_DMA_CHANNEL_t Dma_Channel;
 
@@ -529,12 +529,11 @@ static int __init DMA_PL330_LKM_init(void){
       printk(KERN_INFO "DMA LKM: HPS OCR ioremap success\n");
     }
 
-   //--Allocate uncached buffer--//
+   //--Allocate uncached buffer for DMA transfer--//
    //The dma_alloc_coherent() function allocates non-cached physically
    //contiguous memory. Accesses to the memory by the CPU are the same
    //as a cache miss when the cache is used. The CPU does not have to
    //invalidate or flush the cache which can be time consuming.
-
    non_cached_mem_v = dma_alloc_coherent(
 		      //&pdev,
 		      NULL,
@@ -543,10 +542,25 @@ static int __init DMA_PL330_LKM_init(void){
 		      &non_cached_mem_h, //address to use from DMAC
 		      GFP_KERNEL);
    if (non_cached_mem_v == NULL) {
-	printk(KERN_INFO "DMA LKM: allocation of non-cached buffer failed\n");
+	printk(KERN_INFO "DMA LKM: allocation of transfer buffer failed\n");
 	goto error_dma_alloc_coherent;
    }else{
-      printk(KERN_INFO "DMA LKM: allocation of non-cached buffer successful\n");
+      printk(KERN_INFO "DMA LKM: allocation of transfer buffer successful\n");
+   }
+
+   //--Allocate uncached buffer to store DMA Controller microcode--//
+   DMAC_microcode_v = dma_alloc_coherent(
+		      //&pdev,
+		      NULL,
+		      //PAGE_SIZE,
+		      (256), ////Max in Angstrom and CycloneVSoC is 4MB
+		      &DMAC_microcode_h, //address to use from DMAC
+		      GFP_KERNEL);
+   if (DMAC_microcode_v == NULL) {
+	printk(KERN_INFO "DMA LKM: allocation of microcode buffer failed\n");
+	goto error_dma_alloc_coherent_microcode;
+   }else{
+      printk(KERN_INFO "DMA LKM: allocation of microcode buffer successful\n");
    }
 
    //--export some variables using sysfs--//
