@@ -502,7 +502,7 @@ static int __init DMA_PL330_LKM_init(void){
        printk(KERN_INFO "DMA LKM: DMAC init was successful\n");
    }else{
        printk(KERN_INFO "DMA LKM: DMAC init failed\n");
-       goto error_HPS_ioremap;
+       goto error_dma;
    }
 
    //--Allocate DMA Channel--//
@@ -513,21 +513,8 @@ static int __init DMA_PL330_LKM_init(void){
    }
    else{
        printk(KERN_INFO "DMA LKM: DMA channel allocation failed.\n");
-       goto error_HPS_ioremap;
+       goto error_dma_channel;
   }
-
-    //--ioremap HPS On-Chip memory--//
-   //To ioremap the OCM in the HPS so we can access from kernel space
-    hps_ocr_vaddress = ioremap(HPS_OCR_HADDRESS, HPS_OCR_SIZE);
-    if (hps_ocr_vaddress == NULL)
-    {
-      printk(KERN_INFO "DMA LKM: error doing HPS OCR ioremap\n");
-      goto error_HPS_ioremap;
-    }
-    else
-    {
-      printk(KERN_INFO "DMA LKM: HPS OCR ioremap success\n");
-    }
 
    //--Allocate uncached buffer for DMA transfer--//
    //The dma_alloc_coherent() function allocates non-cached physically
@@ -634,10 +621,13 @@ error_create_dev_class:
 error_kobject_group:
   kobject_put(pl330_lkm_kobj);
 error_kobject_mapping:
+  dma_free_coherent(NULL, 256, DMAC_microcode_v, DMAC_microcode_h);
+error_dma_alloc_coherent_microcode:
   dma_free_coherent(NULL, (NON_CACHED_MEM_SIZE), non_cached_mem_v, non_cached_mem_h);
 error_dma_alloc_coherent:
-   iounmap(hps_ocr_vaddress);
-error_HPS_ioremap:
+error_dma_channel:
+  PL330_uninit();
+error_dma:
    return 0;
 }
 
@@ -647,17 +637,18 @@ error_HPS_ioremap:
  *  We clean-up memory allocation and mappings here.
  */
 static void __exit DMA_PL330_LKM_exit(void){
-   printk(KERN_INFO "Sysfs values: dma_buff_p:%x, prepare_microcode_in_open:%d, dma_transfer_size:%d\n",
+   printk(KERN_INFO
+    "Sysfs vals: dma_buff_p:%x, prepare_microcode_in_open:%d, dma_transfer_size:%d\n",
     (unsigned int) dma_buff_padd, prepare_microcode_in_open, dma_transfer_size);
    printk(KERN_INFO "DMA LKM: Exiting module!!\n");
    //Undo what init did
-   device_destroy(dma_Class, MKDEV(majorNumber, 0));     // remove the device
-   class_unregister(dma_Class);                          // unregister the device class
-   class_destroy(dma_Class);                             // remove the device class
-   unregister_chrdev(majorNumber, DEVICE_NAME);             // unregister the major number
+   device_destroy(dma_Class, MKDEV(majorNumber, 0));// remove the device
+   class_unregister(dma_Class);                  // unregister the device class
+   class_destroy(dma_Class);                     // remove the device class
+   unregister_chrdev(majorNumber, DEVICE_NAME); // unregister the major number
    kobject_put(pl330_lkm_kobj);
+   dma_free_coherent(NULL, 256, DMAC_microcode_v, DMAC_microcode_h);
    dma_free_coherent(NULL, (NON_CACHED_MEM_SIZE), non_cached_mem_v, non_cached_mem_h);
-   iounmap(hps_ocr_vaddress);
    PL330_uninit();
 }
 
