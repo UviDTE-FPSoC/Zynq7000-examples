@@ -4,18 +4,18 @@ MODULES := PMU_User_Space_EN.o
 ARCH := arm
 
 #compiler
-CROSS_COMPILE := ~/angstrom-socfpga/build/tmp-angstrom_v2013_12-eglibc/sysroots/x86_64-linux/usr/bin/armv7ahf-vfp-neon-angstrom-linux-gnueabi/arm-angstrom-linux-gnueabi-
+CROSS_COMPILE := arm-xilinx-linux-gnueabi-
 
 obj-m := $(MODULES)
 
 #path to the compiled kernel
-ROOTDIR := ~/angstrom-socfpga/build/tmp-angstrom_v2013_12-eglibc/work/socfpga_cyclone5-angstrom-linux-gnueabi/linux-altera-ltsi/3.10-r1/git
+ROOTDIR := ~/LnxKernel/linux-digilent/
 
 MAKEARCH := $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE)
 
 all: modules
 modules:
-	$(MAKEARCH) -C $(ROOTDIR) M=${shell pwd} modules 
+	$(MAKEARCH) -C $(ROOTDIR) M=${shell pwd} modules
 
 clean:
 	$(MAKEARCH) -C $(ROOTDIR) M=${shell pwd} clean
