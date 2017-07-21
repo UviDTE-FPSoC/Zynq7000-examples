@@ -10,4 +10,4 @@ How to compile the modules
 
 .. code-block:: bash
 
-   $ make ARCH=arm CROSS_COMPILE=arm-xilinx-linux-gnueabi-
+   $ make
