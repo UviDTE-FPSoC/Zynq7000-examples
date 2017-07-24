@@ -1,5 +1,5 @@
 Linux applications
 ==================
-Baremetal application examples
+Folder for baremetal application examples like an example of a single DMA transfer.
 
 
