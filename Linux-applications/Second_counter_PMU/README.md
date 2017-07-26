@@ -5,34 +5,36 @@ Description
 -----------
 This example uses a counter in the Performance Monitoring Unit (PMU) timer to measure seconds and build a second counter. It prints the a number each second through the serial console. After 60 seconds the application finishes.
 
-PMU is a coprocessor located very close to the processor in ARM Cortex-A9. It is in charge of gathering statistics from the processor, i.e. the number of  exceptions, divisions by 0, etc. Each processor core has its own PMU. In case of Cyclone V the processor has two cores and therefore two PMUs. PMU is not  mapped in the address space of the processor. It is accessed through  instructions like the Neon coprocessors.
+PMU is a coprocessor located very close to the processor in ARM Cortex-A9. It is in charge of gathering statistics from the processor, i.e. the number of  exceptions, divisions by 0, etc. Each processor core has its own PMU. In case of Zynq-7000 the processor has two cores and therefore two PMUs. PMU is not  mapped in the address space of the processor. It is accessed through instructions like the Neon coprocessors.
 
-The PMU has a CPU clock cycle counter that can be used to measure time. To  measure time with PMU is not a good practice because PMU counts cycles from  CPU clock, not time. Therefore if the clock rate of the CPU changes  (i.e. it is reduced to save energy) the time measurement will be wrong.  The advantage of using the PMU is that it measures time very precisely. Therefore if clock rate is stable and we know its rate we can measure time  very precisely with it. 
-In the case of the hardware project used  to test this application (https://github.com/robertofem/CycloneVSoC-examples/tree/master/FPGA-hardware/FPGA_OCR_256K) we set  the processors frequency to 800MHz in Qsys and we do not modify it during the program execution so we can safely measure time.
+The PMU has a CPU clock cycle counter that can be used to measure time. To  measure time with PMU is not a good practice because PMU counts cycles from  CPU clock, not time. Therefore if the clock rate of the CPU changes  (i.e. it is reduced to save energy) the time measurement will be wrong.  The advantage of using the PMU is that it measures time very precisely. Therefore if clock rate is stable and we know its rate we can measure time very precisely with it.
 
-This example can be seen as an example on how to access and control PMU and, because it counts seconds, it can be used to test that the frequency of
-the processor defined in Qsys is correct and that we can do time measurements with the settings of the PMU used.
+This example can be seen as an example on how to access and control PMU. 
 
-When using Operating System the same code could be used to do a second counter. In that case  https://github.com/robertofem/CycloneVSoC-examples/tree/master/Linux-modules/Enable_PMU_user_space should be inserted first so the application has access to PMU from user space. Be aware that if the module enabling PMU is launched in one processor and the application to count seconds is launched in the other the application will not have access to the PMU because the PMU where the module was running was the only PMU activated.
+To test this program the access permission to PMU from user space must be first enabled using [Enable_PMU_user_space](https://github.com/lcostas/Zynq7000-examples/tree/master/Linux-modules/Enable_PMU_user_space) kernel module.  Be aware that if the module enabling PMU is launched in one processor and the application to count seconds is launched in the other the application will not have access to the PMU because the PMU where the module was running was the only PMU activated. To solve this problem the driver can be inserted and removed from the system several times until both PMUs are activated or taskset can be set to force the application to run in the processor where the PMU was activated.
+
+The code of this example can be also directly compiled in a baremetal application because it doesn´t use any characteristic of the Operating System.
 
 Contents in the folder
 ----------------------
-* main.c: entry point of the program. Initializes 
-* io.c: gives support to printf so characters can be sent over UART.
+* main.c: entry point of the program. Configures the PMU to 667MHz input clock signal (667MHz is the frequency of the Zynq-7000 processors in Zedboard).
 * pmu.c and pmu.h: functions to control the PMU timer.
-* alt_types.h file copied from hwlib.
-* cycloneV-dk-ram-modified.ld: describes the memory regions (stack, heap, etc.).
 * Makefile: describes compilation process.
 
 Compilation
 -----------
-Open SoC EDS Command Shell, navigate to the folder of the example and type make.
-This programs was tested with Altera SoC EDS v16.1
-The compilation process generates two files:
-* baremetalapp.bin: to load the baremetal program from u-boot
-* baremetalapp.bin.img: to load the baremetal program from preloader
-    
+* Install a compiler. In [Linaro Tutorial](https://github.com/lcostas/Zynq7000-examples/tree/master/SD-operating-system/Linaro).
+* In this case we used the linaro for Xillinx from and the makefiles sets _CROSS_COMPILE := arm-xilinx-linux-gnueabi-_. You have to change the path of the compiler to point to the name of your compiler if you install a different one.
+* Using a terminal navigate to this application folder and type make.
+
+The output of the compilation is the executable Second_counter_PMU.
+
 How to test
 -----------
-In the following folder there is an example on how to run baremetal examples available in this repository:
-(https://github.com/robertofem/CycloneVSoC-examples/tree/master/SD-baremetal.
+* Copy [Enable_PMU_user_space](https://github.com/lcostas/Zynq7000-examples/tree/master/Linux-modules/Enable_PMU_user_space) module and this application into the SD card.
+* Insert [Enable_PMU_user_space](https://github.com/lcostas/Zynq7000-examples/tree/master/Linux-modules/Enable_PMU_user_space) and run this application using:
+ ```bash
+  $ insmod PMU_User_Space_EN.ko
+  $ chmod 777 Second_counter_PMU
+  $ ./Second_counter_PMU
+```
