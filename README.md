@@ -7,7 +7,7 @@ to other boards including Zynq-7000 chips because they do not interact with the
 hardware in the board.
 
 <p align="center">
-  <img src="https://github.com/lcostas/Zynq7000-examples/raw/master/Zynq7000.png" width="450" align="middle" alt="Cyclone V SoC simplified block diagram" />
+  <img src="https://github.com/UviDTE-FPSoC/Zynq7000-examples/raw/master/Zynq7000.png" width="450" align="middle" alt="Cyclone V SoC simplified block diagram" />
 </p>
 
 This repository contains:
