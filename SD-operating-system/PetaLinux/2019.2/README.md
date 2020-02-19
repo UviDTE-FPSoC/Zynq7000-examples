@@ -17,6 +17,8 @@ Table of contents:
   - [Configuration](#configuration)
     - [Bash or Dash](#bash-or-dash)
     - [Source PetaLinux Tools](#source-petalinux-tools)
+    - [Creating a Project with the Board Support Package BSP](#creating-a-project-with-the-board-support-package)
+    - [Handware Configuration](#hardware configuration)
 
 Vivado SDK
 ----------
@@ -83,7 +85,7 @@ In our case, the full command line would look like this.
 #### Source XRT
 The next thing to take care of will be to set up the environment to run the Vitis Software Platform. The set up procedure is followed from the [*Vitis Unified Software Platform Documentation. Embedded Software Development. Page: 21*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1400-vitis-embedded.pdf).
 
-This includes setting up the 'settings64.sh' and 'setup.sh' files in the Vitis and Xilinx XRT installation directories, respectively. To avoid needing to type the source commands into the shell every time we want to use the tools, you can add a couple lines to the .bashrc script. To modify this system wide, we will use a text editor, atom, to modify the script. For Ubuntu, the bash.bashrc script is located in the /etc directory. The script can be easily openned with the following command. The 'atom' sentence can be switched for any other text editor installed in the system.
+This includes sourcing the 'settings64.sh' and 'setup.sh' files in the Vitis and Xilinx XRT installation directories, respectively. To avoid needing to type the source commands into the shell every time we want to use the tools, you can add a couple lines to the .bashrc script. To modify this system wide, we will use a text editor, atom, to modify the script. For Ubuntu, the bash.bashrc script is located in the /etc directory. The script can be easily openned with the following command. The 'atom' sentence can be switched for any other text editor installed in the system.
 
 > sudo atom /etc/bash.bashrc
 
@@ -147,10 +149,52 @@ In order to stablish the bash as default, type on the command line the following
 
 > sudo dpkg-reconfigure dash
 
-After typing in the command, we are asked if we want to set up the 'dash' as our default shell, and we have to select 'NO'.
+After typing in the command, we are asked if we want to set up the 'dash' as our default shell, and we have to select *'NO'*.
 
 ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Bash%20configuration.png)
 
 
 
 #### Source PetaLinux Tools
+The next thing to take care of will be to source the tools for PetaLinux to use within the terminal window. This includes the 'settings64.sh' and 'settings.sh' files in the Vivado and PetaLinux installation directories, respectively. To avoid typing the source commands into the shell every time, you can add a couple lines to the .bashrc script. To modify this system wide, we will use a text editor, atom, to modify the script. For Ubuntu, the bash.bashrc script is located in the /etc directory. The script can be easily openned with the following command. The 'atom' sentence can be switched for any other text editor installed in the system.
+
+> sudo atom /etc/bash.bashrc
+
+Once the script is opened, add the two commands for sourcing the appropriate files. The path that is now idicated simply outlines where the 'settings.sh' and 'settings64.sh' files are located at.
+
+> source /media/hdd/PetaLinux/settings.sh
+>
+> source /media/hdd/Xilinx/Vivado/2019.2/settings64.sh
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Source%20PetaLinux.png)
+
+With the two lines added, save the changes and close the editor.
+
+
+
+#### Creating a Project with the Board Support Package BSP
+The BSP provides a functioning Linux image for begginers with PetaLinux. In this case, to download the BSP for the Zedboard, [clik here](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html).
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/BSP%20download.png)
+
+The download of the BSP will start after identifying your user in the Xilinx web page. Once the download is performed, some aid can be found in the 'PetaLinux Documentation. Reference Guide. Page 16' to correctly install the BSP.
+
+First of all, make sure the previous configuration setup of PetaLinux has been carried out. Open a new terminal and access the directory you want your PetaLinux projects to be saved at, in our case the following.
+
+> cd /Desktop/TFM/PetaLinuxProjects
+
+Now, run the following comand, indicating the location of the BSP file that was just downloaded and making sure you uncompress this file first.
+
+> petalinux-create -t project -s <'path-to-bsp'>
+
+In our case:
+
+> petalinux-create -t project -s /media/hdd/dl/avnet-digilent-zedboard-v2019.2-final.bsp
+
+If you were to create a fresh project, without using a BSP, you type in the following command.
+
+> petalinux-create --type project --template zynq --name test_01
+
+The type should not be changed, the template has to be the adecuate one for your board and finally the name can be chosen by you as well. This command though simply provides a folder structure for the projects. The actual build to use PetaLinux would have to be created by the user.
+
+#### Hardware Configuration
