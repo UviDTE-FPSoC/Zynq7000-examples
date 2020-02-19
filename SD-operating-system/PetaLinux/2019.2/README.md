@@ -5,10 +5,9 @@ This guide is created to walk you through the installation process of the operat
 
 The guide is divided in two main parts, which includes the installation of the Vivado SDK and the cofiguring of the PetaLinux project for ZedBoard. It is important to note that the versions for both PetaLinux and Vivado should be the same. We will be working with version 2019.2 in this guide.
 
-Table of contents
------------------
+Table of contents:
 1. [Vivado SDK](#---vivado-sdk)
-2. [Vivado Design Suite and Visits IDE Installation](#---vivado-design-suite-and-visits-ide-installation)
+2. [Vivado Design Suite and Visits IDE Installation](#---vivado-design-suite-and-vitis-ide-installation)
 
 1 - Vivado SDK
 ----------
