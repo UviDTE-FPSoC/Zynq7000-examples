@@ -50,7 +50,7 @@ Now, you'll be able to customize the download. In this case we are going to leav
 
 ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Vivado%20SDK%20Installation%203.png)
 
-Note that, for Linux, the cable drivers aren't installed. Follow the UG973 isntructions to install them. The document that we are using is the [*Vivado Design Suite User Guide, page 44*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug973-vivado-release-notes-install-license.pdf). There is a copy of this document uploaded in the folder *"Xilinx Guide"* folder of this repository. To install the cable drivers, enter the following instructions in the command window:
+Note that, for Linux, the cable drivers aren't installed. Follow the UG973 isntructions to install them. The document that we are using is the [*Vivado Design Suite User Guide, page 44*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug973-vivado-release-notes-install-license.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository. To install the cable drivers, enter the following instructions in the command window:
 
 > ${vivado_install_dir}/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_drivers
 
@@ -60,7 +60,7 @@ Modify the *${vivado_install_dir}* with the directory of the data folder in your
 
 ### Xilinx Runtime XRT Installation
 The installation of the XRT should be performed if using a chip of the family Zynq UltraScale+ MPSoC-based, as it is implemented as a combination of user-space and kernel driver components. If you are using a chip from another family, it also provides a software interface to Xilinx programmable logic devices.
-The steps to install the package are followed from [*Vitis Unified Software Platform Documentation. Embedded Software Development. Page: 19*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1400-vitis-embedded.pdf). There is a copy of this document uploaded in the folder *"Xilinx Guide"* folder of this repository.
+The steps to install the package are followed from [*Vitis Unified Software Platform Documentation. Embedded Software Development. Page: 19*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1400-vitis-embedded.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository.
 To download the DEV file for Linux 16.04 [click here](https://www.xilinx.com/bin/public/openDownload?filename=xrt_201920.2.3.1301_16.04-xrt.deb). If you have other Linux versions, go to the documentation page before mentioned.
 
 Once the packet has been downloaded, type in the following command to install it.
