@@ -15,7 +15,7 @@ Table of contents:
 - [PetaLinux](#petalinux)
   - [Installation](#installation)
   - [Configuration](#configuration)
-    - [Bash/Dash](#bash-/-dash)
+    - [Bash/Dash](#bash/dash)
     - [Source PetaLinux Tools](#source-petalinux-tools)
 
 Vivado SDK
