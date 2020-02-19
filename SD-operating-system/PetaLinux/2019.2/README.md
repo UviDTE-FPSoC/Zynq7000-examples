@@ -7,7 +7,7 @@ The guide is divided in two main parts, which includes the installation of the V
 
 Table of contents:
 1. [Vivado SDK](#---vivado-sdk)
-2. [Vivado Design Suite and Visits IDE Installation](#---vivado-design-suite-and-vitis-ide-installation)
+2. [Vivado Design Suite and Vitis IDE Installation](#---vivado-design-suite-and-vitis-ide-installation)
 
 1 - Vivado SDK
 ----------
