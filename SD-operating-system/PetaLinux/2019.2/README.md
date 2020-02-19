@@ -18,7 +18,7 @@ Table of contents:
     - [Bash or Dash](#bash-or-dash)
     - [Source PetaLinux Tools](#source-petalinux-tools)
     - [Creating a Project with the Board Support Package BSP](#creating-a-project-with-the-board-support-package)
-    - [Handware Configuration](#hardware configuration)
+    - [Hardware Configuration](#hardware configuration)
 
 Vivado SDK
 ----------
