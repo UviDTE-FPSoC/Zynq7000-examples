@@ -7,7 +7,7 @@ The guide is divided in two main parts, which includes the installation of the V
 
 Table of contents:
 - [Vivado SDK](#vivado-sdk)
-   - [Vivado Design Suite and Vitis IDE Installation](#-vivado-design-suite-and-vitis-ide-installation)
+   - [Vivado Design Suite and Vitis IDE Installation](#vivado-design-suite-and-vitis-ide-installation)
 
 Vivado SDK
 ----------
@@ -16,4 +16,4 @@ First of all, it is neccesary to install the Vivado SDK. The software can be dow
 ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Vivado%20SDK%20download.png)
 
 
-### Vivado Design Suite and Visits IDE Installation
+### Vivado Design Suite and Vitis IDE Installation
