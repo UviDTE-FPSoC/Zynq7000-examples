@@ -12,6 +12,11 @@ Table of contents:
      - [Source XRT](#source-xrt)
    - [Embedded Platform Installation](#embedded-platform-installation)
 - [Vitis AI](#vitis-ai)
+- [PetaLinux](#petalinux)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+    - [Bash-Dash](#bash---dash)
+    - [Source PetaLinux Tools](#source-petalinux-tools)
 
 Vivado SDK
 ----------
@@ -103,3 +108,49 @@ If any of the possible Embedded Platforms were to be istalled, the following env
 
 Vitis AI
 --------
+In order to download Vitis AI, [click here](https://github.com/Xilinx/Vitis-AI). The link will direct you to a github repository from Xilinx which provides all the information of how to correctly install the package.
+
+
+
+PetaLinux
+---------
+### Installation
+In order to install PetaLinux in your device, it is very important to download the same PetaLinux version as the one previously downloaded for the Vivado SDK. In this case, we will download the Petalinux Tools installer by [clicking here](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html).
+
+Previous to installing PetaLinux, it is neccesary to install a series of tools indicated in the [*Petalinux Tools Documentation. Reference Guide page: 10 *](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository.
+
+The istallation of these tools for an Ubuntu machine can be performed with the following command.
+
+> sudo apt-get install tofrodos iproute gawk make net-tools libncurses5-dev tftpd zlib1g:i386 libssl-dev flex bison libselinux1 gnupg wget diffstat chrpath socat xterm autoconf libtool tar unzip texinfo zlib1g-dev gcc-multilib build-essential screen pax gzip python
+
+Once the installer file has been downloaded, create a directory where you want the PetaLinux Tools to be installed in. It is highly recommended to create this directory in a HDD disk, as installation needs 100 GB of space, although final space used goes down to 20 GB. Once you've created this folder, open a terminal in the directory the installer has been dowloaded to, likely *"Downloads"*, and introduce the following comands to give execution permision for the file and running the installer.
+
+> chmod +x 'name_of_the_file'.run
+>
+> ./'name_of_the_file'.run {directory}/PetaLinux
+
+In the directory part you shall enter the path to your PetaLinux folder in your computer, for example:
+
+> ./petalinux-v2019.2-final-installer.run media/hdd/PetaLinux
+
+The completion of the installation requires the acceptance of the license agreement of the software itself, the WebPACK software and several third party software licenses as well.
+
+
+
+### Configuration
+PetaLinux configuration is performed following the [*Petalinux Tools Documentation. Reference Guide*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf).
+
+#### Bash-Dash
+First of all, Petalinux requires the usage of the 'bash' shell rather than the 'dash'. Bash is the Bourne-Once extra shell. Bash is a full-featured shell acceptable for interactive use. Bash a superset of POSIX efficiency. Dash is the Debian Almquist Shell. Dash implements the Single Unix Spec. Dash is for non-interactive script execution. Dash Only helps POSIX compliant choices.
+
+In order to stablish the bash as default, type on the command line the following.
+
+> sudo dpkg-reconfigure dash
+
+After typing in the command, we are asked if we want to set up the 'dash' as our default shell, and we have to select 'NO'.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Bash%20configuration.png)
+
+
+
+#### Source PetaLinux Tools
