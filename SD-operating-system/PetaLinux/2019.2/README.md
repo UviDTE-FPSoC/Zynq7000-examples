@@ -7,6 +7,4 @@ The guide is divided in two main parts, which includes the installation of the V
 
 Vivado SDK
 ----------
-First of all, it is neccesary to install the Vivado SDK. The software can be dowloaded from the Xilinx webpage, where it's neccesary to create an account in order to download any packages. The following link can be used, and it enables to install both the Vivado and Vitis IDE.
-
-[https://www.xilinx.com/support/download.html](https://www.xilinx.com/support/download.html)
+First of all, it is neccesary to install the Vivado SDK. The software can be dowloaded from the Xilinx webpage, where it's neccesary to create an account in order to download any packages. To install both the Vivado and Vitis IDE, [click here](https://www.xilinx.com/support/download.html).
