@@ -15,7 +15,7 @@ Table of contents:
 - [PetaLinux](#petalinux)
   - [Installation](#installation)
   - [Configuration](#configuration)
-    - [Bash-Dash](#bash---dash)
+    - [Bash/Dash](#bash-/-dash)
     - [Source PetaLinux Tools](#source-petalinux-tools)
 
 Vivado SDK
@@ -140,7 +140,7 @@ The completion of the installation requires the acceptance of the license agreem
 ### Configuration
 PetaLinux configuration is performed following the [*Petalinux Tools Documentation. Reference Guide*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf).
 
-#### Bash-Dash
+#### Bash/Dash
 First of all, Petalinux requires the usage of the 'bash' shell rather than the 'dash'. Bash is the Bourne-Once extra shell. Bash is a full-featured shell acceptable for interactive use. Bash a superset of POSIX efficiency. Dash is the Debian Almquist Shell. Dash implements the Single Unix Spec. Dash is for non-interactive script execution. Dash Only helps POSIX compliant choices.
 
 In order to stablish the bash as default, type on the command line the following.
