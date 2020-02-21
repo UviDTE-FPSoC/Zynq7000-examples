@@ -12,6 +12,7 @@ Table of contents:
      - [Source XRT](#source-xrt)
    - [Embedded Platform Installation](#embedded-platform-installation)
 - [Vitis AI](#vitis-ai)
+  - [Ensure the linux user is in the group docker](#ensure-the-linux-user-is-in-the-group-docker)
 - [PetaLinux](#petalinux)
   - [Installation](#installation)
   - [Configuration](#configuration)
@@ -19,6 +20,9 @@ Table of contents:
     - [Source PetaLinux Tools](#source-petalinux-tools)
     - [Creating a Project with the Board Support Package BSP](#creating-a-project-with-the-board-support-package)
     - [Hardware Configuration](#hardware-configuration)
+    - [Importing Hardware Configuration](#importing-hardware-configuration)
+    - [Build a system image](#build-a-system-image)
+    - [Generate the boot image](#generate-the-boot-image)
 
 Vivado SDK
 ----------
@@ -113,6 +117,50 @@ Vitis AI
 In order to download Vitis AI, [click here](https://github.com/Xilinx/Vitis-AI). The link will direct you to a github repository from Xilinx which provides all the information of how to correctly install the package.
 
 
+Vitis AI is Xilinx’s development stack for AI inference on Xilinx hardware platforms, including both edge devices and Alveo cards. It consists of optimized IP, tools, libraries, models, and example designs. It is designed with high efficiency and ease of use in mind, unleashing the full potential of AI acceleration on Xilinx FPGA and ACAP.
+
+In order to install this library, you need to perform a series of steps.
+
+- Clone the Vitis AI repository to obtain the examples, reference code and scripts.
+
+  > git clone https://github.com/Xilinx/Vitis-AI
+  >
+  > cd Vitis-AI
+
+- [Install docker](https://github.com/Xilinx/Vitis-AI/blob/master/doc/install_docker/README.md)
+- [Ensure the linux user is in the group docker](https://docs.docker.com/install/linux/linux-postinstall/)
+- [Load and run docker container](https://github.com/Xilinx/Vitis-AI/blob/master/doc/install_docker/load_run_docker.md)
+- Get started with examples
+  - [ZU+ MPSoC/Zynq-7000](https://github.com/Xilinx/Vitis-AI/blob/master/mpsoc/README.md)
+
+
+
+### Ensure the linux user is in the group docker
+This step is highlighted as some instructions might from the provided link might result into some confusion.
+
+First of all, I recommend not creating an Unix Group called docker if you don't know what you are doing, as this could lead to some dangers highlihgted in this [link](https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface). Not creating this group only means that all `docker` commands can only be accessed using the `sudo` command.
+
+Configuring docker to start on boot, if you run a Ubuntu 16.04 or higher, is as easy as typing in the following command.
+
+> sudo systemctl enable docker
+
+To disable this option:
+
+> sudo systemctl disable docker
+
+
+
+#### Configure default logging driver
+Configuring this driver is recommended to avoid the log file from expanding in size over time. To do this, you have to access the `/etc/docker/` file in your machine, and set the logging driver to the `syslog` file:
+
+```json
+{
+  "log-driver": "syslog"
+}
+```
+
+
+
 
 PetaLinux
 ---------
@@ -198,3 +246,52 @@ If you were to create a fresh project, without using a BSP, you type in the foll
 The type should not be changed, the template has to be the adecuate one for your board and finally the name can be chosen by you as well. This command though simply provides a folder structure for the projects. The actual build to use PetaLinux would have to be created by the user.
 
 #### Hardware Configuration
+First of all, it is neccesary to create a hardware configuration, which later you will have to export into a .xsa file. If you are using a BSP, in this guide, the Zedboard BSP, this file is created by default. You can find it in the following directory:
+
+`<directory_PetaLinux_projects_are_saved>/avnet-digilent-zedboard-2019.2/project-spec/hw-description/system.xsa`
+
+In our case, this directory would be:
+
+`/home/fcarp/Desktop/TFM/PetaLinuxProjects/avnet-digilent-zedboard-2019.2/project-spec/hw-description/system.xsa`
+
+
+
+### Importing Handware Configuration
+From the petalinux project directory, run the following comand, giving the path to the .xsa file.
+
+`petalinux-config --get-hw-description=<path-to-directory-containing-hardware description-file>`
+
+In our case the directory we open the terminal on and the command are as follows.
+
+```
+cd home/fcarp/Desktop/TFM/PetaLinuxProjects/avnet-digilent-zedboard-2019.2/
+
+petalinux-config --get-hw-description=project-spec/hw-description/
+```
+
+There is a problem though, as when running this command in the PetaLinux Project directory, the terminal is not able to find the 'system.xsa' file. After reviewing the `<directory_PetaLinux_projects_are_saved>/project-spec/hw-description/system.xsa` directory, it turned out that the file had been erased.
+
+In the case this happens to you, we recomend to make a copy of the 'system.xsa' file, and paste it inside the following directory.
+
+`<directory_PetaLinux_projects_are_saved>/project-spec/`
+
+If we now run the config command again, the terminal won't release the previous error.
+
+`petalinux-config --get-hw-description=project-spec/`
+
+After executing the command, the following window is opened, and we have to select the 'Subsystem AUTO Hardware Settings'. For additional information of the 'Subsystem AUTO Hardware Settings' checkout [Petalinux Tools Documentation. Reference Guide. Page 99](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf).
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/PetaLinux%20configuration%201.png)
+
+After pressing the enter key, the configuration might take several minutes.
+
+
+
+### Build a system image
+In the project directory, type in the following command.
+
+`petalinux-build`
+
+
+
+### Generate the boot image
