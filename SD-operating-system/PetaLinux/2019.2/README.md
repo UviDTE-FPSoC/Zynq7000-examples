@@ -23,6 +23,8 @@ Table of contents:
     - [Importing Hardware Configuration](#importing-hardware-configuration)
     - [Build a system image](#build-a-system-image)
     - [Generate the boot image](#generate-the-boot-image)
+    - [Configure SD card to boot PetaLinux](#configure-sd-card-to-boot-petalinux)
+    - [Boot PetaLinux image on Hardware with an SD card](#boot-petalinux-image-on-hardware-with-an-sd-card)
 
 Vivado SDK
 ----------
@@ -295,3 +297,148 @@ In the project directory, type in the following command.
 
 
 ### Generate the boot image
+This command should be run in the same directory than the previous, and it might take a bit of time as well. The last step would be to run the next command, and after its execution you should have the BOOT.bin and U-boot files ready to go.
+
+`petalinux-package --boot --fsbl <FSBL image> --fpga <FPGA bitstream> --u-boot`
+
+In order to correctly fill in the fields `FSBL image` and `FPGA bitstream`, we derive to the [PetaLinux Tools Documentation. Command Line Reference Guide. Page 20](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1157-petalinux-tools-command-line-guide.pdf). The following images highlingth the options that have to be selected according to the use of the zedboard. The command line for our case would be the following.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/PetaLinux%20configuration%202.png)
+
+`petalinux-package --boot --force --fsbl ./images/linux/zynq_fsbl.elf --fpga ./images/linux/system.bit --u-boot`
+
+The `/images/linux/` is in the directory created by the command `petalinux-create` command, in this case, `/home/fcarp/Desktop/TFM/PetaLinuxProjects/avnet-digilent-zedboard-2019.2/`.
+
+
+
+### Configure SD card to boot PetaLinux
+First of all, we have to create two partitions in the SD card. In order to do this, we have used the utility fdisk. It is highly recommended though to use GParted if you are using a Linux machine, as it simplifies and speeds up the task.
+ First of all we are going to see a list of all the disks in the device with the following comand.
+
+ `sudo fdisk -l`
+
+ ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%201.png)
+
+The SD, in our case, is 16 GB, and it is identified as /dev/sdc. Now we have to enter the command mode in that disk.
+
+`sudo fdisk /dev/sdc`
+
+Inside the command mode, if we press p, we can print a table with the partitions of the card. In this case there is only one partition.
+
+To delete a partition, we would type the command d, and afterwards the number of the partition. In this case, as there is only one partition, we don't have to enter the number.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%202.png)
+
+To create a partition, we type the command n. In this case, as we are only going to have two partitions, we are going to create two primary partitions, p.	 The first one is going to have 1 GB of space. In order to create we have to indicate is a primary partition, p; specify the number, 1; where the partition starts, default; and the size of the partition, 1 GB (+1G).
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%203.png)
+
+The second partition is created as shown in the next image.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%204.png)
+
+The second partition has a size of 13.9 GB.
+
+We now have to specify the type of the partition. In this case, we see that both partitions have a Linux type. Partition sdc 1 has to be type FAT32, as indicated in the [Petalinux Tools Documentation. Reference Guide. Page 40](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf).
+
+In order to change the type, we put in the command line t; the number of the partition, 1; and the type we want to stablish, b. To see a list with all the available types, type in L.
+
+Now we can see that the type of the first partition has been switched to 'W95 FAT32'.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%205.png)
+
+The second partition we leave it as Linux type. Once we have the partitions, we write the changes typing w.
+
+Now, we have to format the first partition, /dev/sdc1, as FAT; and the second parition, /dev/sdc2, as ext4. In order to do this, we type in the next commands.
+
+`sudo mkfs.fat /dev/sdc1`
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%206.png)
+
+`sudo mkfs.ext4 /dev/sdc2`
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%207.png)
+
+To check if the partitions were correctly formated, we type the following.
+
+`lsblk -f`
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%208.png)
+
+Now, we change the label of the partitions, specifying BOOT for the first one and RootFS for the second one, using the following commands.
+
+```
+sudo fatlabel /dev/sdc1 BOOT
+
+sudo e2label /dev/sdc2 RootFS
+```
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%209.png)
+
+The files that we now have to save on each partition are specified in [Petalinux Tools Documentation. Reference Guide. Page 65](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf).
+
+In order to boot PetaLinux with the SD card, we need to make a couple of changes to the configuration. Get into the PetaLinux project directory, and insert the following comands.
+
+```
+cd /home/fcarp/Desktop/TFM/PetaLinuxProjects/avnet-digilent-zedboard-2019.2/
+
+petalinux-config
+```
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%2010.png)
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%2011.png)
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%2012.png)
+
+Exit configuration menu and save the settings. Build and generate the boot image.
+
+```
+petalinux-build
+
+petalinux-package --boot --force --fsbl ./images/linux/zynq_fsbl.elf --fpga ./images/linux/system.bit --u-boot
+```
+
+Extract the 'rootfs.tar.gz' file present in the /images/linux directory of your PetaLinux project. This step is specified in the Xilinx documentation but you probably can skip it.
+
+```
+cd images/linux
+
+tar xvf rootfs.tar.gz
+```
+
+The final steps are to copy several files into the partitions previously created. Enter the directory of your PetaLinux project with the terminal. Once in the directory, copy to the BOOT partition the BOOT.bin file and the image.ub file. This second file contains the device tree and the kernel image files.
+
+```
+cp images/linux/BOOT.BIN /media/fcarp/BOOT/
+
+cp images/linux/image.ub /media/fcarp/BOOT/
+
+cp images/linux/boot.scr /media/fcarp/BOOT/
+```
+
+Copy the rootfs.tar.gz file to the RootFS partition, and extract the file system.bit.
+
+```
+cd images/linux
+
+sudo tar xvf rootfs.tar.gz -C /media/fcarp/RootFS
+
+```
+
+> *NOTE*: The previous commands copy this files to the previously created partitions, which are accesible from the /media/fcarp/ directory in our case. This directory can change on other devices.
+
+
+
+### Boot PetaLinux image on Hardware with an SD card
+The procedure is specified in [Petalinux Tools Documentation. Reference Guide. Page 41](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf).
+
+Connect the Zedboard to the power and to the computer through the serial port with the micro USB cable.
+
+Before powering on the board, set up the SD boot mode with the MIO Zedboard bank, as shown in table 1 in the ZedBoard manual, table 2 in the Zynq 7000 chip manual and in the figure.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Boot%20PetaLinux%201.png)
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Boot%20PetaLinux%202.png)
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Boot%20PetaLinux%203.png)
