@@ -65,9 +65,17 @@ Now, you'll be able to customize the download. In this case we are going to leav
 
 Note that, for Linux, the cable drivers aren't installed. Follow the UG973 isntructions to install them. The document that we are using is the [*Vivado Design Suite User Guide, page 44*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug973-vivado-release-notes-install-license.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository. To install the cable drivers, enter the following instructions in the command window:
 
-> ${vivado_install_dir}/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_drivers
+`${vivado_install_dir}/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_drivers`
 
 Modify the *${vivado_install_dir}* with the directory of the data folder in your computer.
+
+In our case we used the following commands from the vivado install directory:
+
+```
+cd /data/xicom/cable_drivers/lin64/install_script/install_drivers
+
+sudo ./instal_drivers
+```
 
 
 
