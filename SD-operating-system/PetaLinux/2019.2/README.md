@@ -101,7 +101,7 @@ The next thing to take care of will be to set up the environment to run the Viti
 
 This includes sourcing the 'settings64.sh' and 'setup.sh' files in the Vitis and Xilinx XRT installation directories, respectively. To avoid needing to type the source commands into the shell every time we want to use the tools, you can add a couple lines to the .bashrc script. To modify this system wide, we will use a text editor, atom, to modify the script. For Ubuntu, the bash.bashrc script is located in the /etc directory. The script can be easily openned with the following command. The 'atom' sentence can be switched for any other text editor installed in the system.
 
-> sudo atom /etc/bash.bashrc
+> sudo atom /home/.bashrc
 
 Once the script is opened, add the two commands for sourcing the appropriate files. The path that is now idicated simply outlines where the 'settings.sh' and 'settings64.sh' files are located at.
 
