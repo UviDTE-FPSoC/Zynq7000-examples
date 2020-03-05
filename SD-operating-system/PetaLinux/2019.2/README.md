@@ -81,7 +81,7 @@ sudo ./instal_drivers
 
 ### Xilinx Runtime XRT Installation
 The installation of the XRT should be performed if using a chip of the family Zynq UltraScale+ MPSoC-based, as it is implemented as a combination of user-space and kernel driver components. If you are using a chip from another family, it also provides a software interface to Xilinx programmable logic devices.
-The steps to install the package are followed from [*Vitis Unified Software Platform Documentation. Embedded Software Development. Page: 19*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1400-vitis-embedded.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository.
+The steps to install the package are followed from [*Vitis Unified Software Platform Documentation. Embedded Software Development. Page: 19*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1400-vitis-embedded.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository just in case new versions of the Xilinx guide are uploaded.
 To download the DEV file for Linux 16.04 [click here](https://www.xilinx.com/bin/public/openDownload?filename=xrt_201920.2.3.1301_16.04-xrt.deb). If you have other Linux versions, go to the documentation page before mentioned.
 
 Once the packet has been downloaded, type in the following command to install it.
