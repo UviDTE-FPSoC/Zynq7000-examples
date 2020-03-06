@@ -2,9 +2,7 @@ Zynq-7000 examples
 ==================
 
 Examples using the FPSoC chip [Zynq-7000](https://www.xilinx.com/products/silicon-devices/soc/zynq-7000.html).
-All these examples were tested on Zedboard. However most of them are easily ported
-to other boards including Zynq-7000 chips because they do not interact with the
-hardware in the board.
+All these examples were tested on Zedboard. However most of them are easily ported to other boards including Zynq-7000 chips because they do not interact with the hardware in the board.
 
 <p align="center">
   <img src="https://github.com/UviDTE-FPSoC/Zynq7000-examples/raw/master/Zynq7000.png" width="450" align="middle" alt="Cyclone V SoC simplified block diagram" />
@@ -26,4 +24,6 @@ This repository contains:
 
 * **SD-operating-system**: It explains how to build an SD card with Operating System from scratch.
   Currently the OS that have been tested are:
-	* Linaro Ubuntu Distribution.
+	* Linaro Ubuntu Distribution on Zedboard.
+    * Petalinux 2018.2 on Trenz TE0720 board.
+    * Petalinux 2019.2 on Zedboard.

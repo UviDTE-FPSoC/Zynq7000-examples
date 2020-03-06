@@ -1,0 +1,15 @@
+CSV_VERSION=1.3
+#Comment:-do not change matrix position or remove CSV_VERSION:
+ID  , PRODID                ,PARTNAME         ,BOARDNAME                       ,SHORTNAME   ,ZYNQFLASHTYP ,FPGAFLASHTYP                            ,Note
+1   , te0720-03-2if         ,xc7z020clg484-2  ,trenz.biz:te0720_2i:part0:1.0   ,2if         ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:1|R:1GB
+2   , te0720-03-2ifc3       ,xc7z020clg484-2  ,trenz.biz:te0720_2i:part0:1.0   ,2if         ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:1|R:1GB
+3   , te0720-03-2ifc8       ,xc7z020clg484-2  ,trenz.biz:te0720_2i:part0:1.0   ,2if         ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:1|R:1GB
+4   , te0720-03-1qf         ,xa7z020clg484-1q ,trenz.biz:te0720_1q:part0:1.0   ,1qf         ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:1|R:1GB
+5   , te0720-03-1cf         ,xc7z020clg484-1  ,trenz.biz:te0720_1c:part0:1.0   ,1cf         ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:1|R:1GB
+6   , te0720-03-1cfa        ,xc7z020clg484-1  ,trenz.biz:te0720_1c:part0:1.0   ,1cf         ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:1|R:1GB
+7   , te0720-03-2ef         ,xc7z020clg484-2  ,trenz.biz:te0720_2e:part0:1.0   ,2ef         ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:1|R:1GB
+8   , te0720-03-1cr         ,xc7z020clg484-1  ,trenz.biz:te0720_1c:part0:2.0   ,1cr         ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:2|R:256MB
+9   , te0720-03-l1if        ,xc7z020iclg484-1l,trenz.biz:te0720_1il:part0:1.0  ,l1if        ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:3|R:512MB_L
+10  , te0720-03-14s-1c      ,xc7z014sclg484-1 ,trenz.biz:te0720_14s:part0:1.0  ,14s         ,qspi_single  ,s25fl256s-3.3v-qspi-x4-single|SPIx4|32  ,PCB:2.3|B:1|I:1|P:4|R:1GB_L
+11  , te0720-03-1qfa        ,xa7z020clg484-1q ,trenz.biz:te0720_1q:part0:1.0   ,1qf         ,qspi_single  ,mt25ql256-qspi-x4-single|SPIx4|32       ,PCB:2.3|B:1|I:1|P:1|R:1GB
+12  , te0720-03-2ifa        ,xc7z020clg484-2  ,trenz.biz:te0720_2i:part0:1.0   ,2if         ,qspi_single  ,mt25ql256-qspi-x4-single|SPIx4|32       ,PCB:2.3|B:1|I:1|P:1|R:1GB
