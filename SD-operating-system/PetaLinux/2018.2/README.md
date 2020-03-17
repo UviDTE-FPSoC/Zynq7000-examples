@@ -256,7 +256,7 @@ Follow the tutorial in [PetaLinux KICKstart](https://wiki.trenz-electronic.de/di
   ```
   petalinux-config
   ```
-  Select *ps7_uart_0* in *Subsystem AUTO Hardware Settings->Serial Settings->Primary stdin/stdout* so the kernel can boot through the USB Serial console of the board.
+  Select *ps7_uart_0* in *Subsystem AUTO Hardware Settings->Serial Settings->Primary stdin/stdout* so the kernel can boot through the USB Serial console of the board. By default the system uses INITRAMFS (RAM file system). This means that when booting, the system copies the root file system to RAM and works from there (the same as in a Ubuntu live pendrive). This means that when the board restarts all files in the file system are lost. To solve this go to *Image Packaging Configuration->Root filesystem type* and change *INITRAMFS* by *SD card*. In this way the OS will use the rootfs partition of the SD card as non volatile root file system (it will work as the "hard drive" of the system). 
 
 * Build petalinux:
     ```
