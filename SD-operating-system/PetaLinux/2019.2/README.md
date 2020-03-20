@@ -1,4 +1,4 @@
-PetaLinux build guide
+  PetaLinux build guide
 =====================
 
 This guide is created to walk you through the installation process of the operating system PetaLinux, in order to boot it from a SD card. The procedure followed in this guide considers the use of a ZedBoard, which we want to be able to use with the Xilinx software.
@@ -109,7 +109,7 @@ Once the script is opened, add the two commands for sourcing the appropriate fil
 >
 > source /opt/xilinx/xrt/setup.sh
 
-![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Source%20XRT.png)
+![alt text](hhttps://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SourceXRT.png)
 
 
 
@@ -224,7 +224,7 @@ Once the script is opened, add the two commands for sourcing the appropriate fil
 >
 > source /media/hdd/Xilinx/Vivado/2019.2/settings64.sh
 
-![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Source%20PetaLinux.png)
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SourcePetaLinux.png)
 
 With the two lines added, save the changes and close the editor.
 
