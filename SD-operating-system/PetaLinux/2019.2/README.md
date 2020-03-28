@@ -3,7 +3,7 @@
 
 This guide is created to walk you through the installation process of the operating system PetaLinux, in order to boot it from a SD card. The procedure followed in this guide considers the use of a ZedBoard, which we want to be able to use with the Xilinx software.
 
-The guide is divided in two main parts, which includes the installation of the Vivado SDK, installation of the Vitis AI package and the cofiguring of the PetaLinux project for ZedBoard. It is important to note that the versions for PetaLinux, Vivado SDK and Vitis AI should be the same. We will be working with version 2019.2 in this guide.
+The guide is divided in two main parts, which includes the installation of the Vivado SDK and the cofiguring of the PetaLinux project for ZedBoard. It is important to note that the versions for PetaLinux and Vivado SDK should be the same. We will be working with version 2019.2 in this guide.
 
 Table of contents:
 - [Vivado SDK](#vivado-sdk)
@@ -11,8 +11,6 @@ Table of contents:
    - [Xilinx Runtime XRT Installation](#xilinx-runtime-xrt-installation)
      - [Source XRT](#source-xrt)
    - [Embedded Platform Installation](#embedded-platform-installation)
-- [Vitis AI](#vitis-ai)
-  - [Ensure the linux user is in the group docker](#ensure-the-linux-user-is-in-the-group-docker)
 - [PetaLinux](#petalinux)
   - [Installation](#installation)
   - [Configuration](#configuration)
@@ -122,66 +120,20 @@ If any of the possible Embedded Platforms were to be istalled, the following env
 
 
 
-Vitis AI
---------
-In order to download Vitis AI, [click here](https://github.com/Xilinx/Vitis-AI). The link will direct you to a github repository from Xilinx which provides all the information of how to correctly install the package.
-
-
-Vitis AI is Xilinx’s development stack for AI inference on Xilinx hardware platforms, including both edge devices and Alveo cards. It consists of optimized IP, tools, libraries, models, and example designs. It is designed with high efficiency and ease of use in mind, unleashing the full potential of AI acceleration on Xilinx FPGA and ACAP.
-
-In order to install this library, you need to perform a series of steps.
-
-- Clone the Vitis AI repository to obtain the examples, reference code and scripts.
-
-  > git clone https://github.com/Xilinx/Vitis-AI
-  >
-  > cd Vitis-AI
-
-- [Install docker](https://github.com/Xilinx/Vitis-AI/blob/master/doc/install_docker/README.md)
-- [Ensure the linux user is in the group docker](https://docs.docker.com/install/linux/linux-postinstall/)
-- [Load and run docker container](https://github.com/Xilinx/Vitis-AI/blob/master/doc/install_docker/load_run_docker.md)
-- Get started with examples
-  - [ZU+ MPSoC/Zynq-7000](https://github.com/Xilinx/Vitis-AI/blob/master/mpsoc/README.md)
-
-
-
-### Ensure the linux user is in the group docker
-This step is highlighted as some instructions might from the provided link might result into some confusion.
-
-First of all, I recommend not creating an Unix Group called docker if you don't know what you are doing, as this could lead to some dangers highlihgted in this [link](https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface). Not creating this group only means that all `docker` commands can only be accessed using the `sudo` command.
-
-Configuring docker to start on boot, if you run a Ubuntu 16.04 or higher, is as easy as typing in the following command.
-
-> sudo systemctl enable docker
-
-To disable this option:
-
-> sudo systemctl disable docker
-
-
-
-#### Configure default logging driver
-Configuring this driver is recommended to avoid the log file from expanding in size over time. To do this, you have to access the `/etc/docker/` file in your machine, and set the logging driver to the `syslog` file:
-
-```json
-{
-  "log-driver": "syslog"
-}
-```
-
-
-
-
 PetaLinux
 ---------
 ### Installation
 In order to install PetaLinux in your device, it is very important to download the same PetaLinux version as the one previously downloaded for the Vivado SDK. In this case, we will download the Petalinux Tools installer by [clicking here](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html).
 
+It is also very important to make sure that the file system of the operating system in your computer, Ubuntu 16.04 LTS in this case, hasn't been encrypted. One option to decrypt it would be to reinstall the SO in you computer.
+Finally, make sure the PetaLinux installation directory is within `home`, as otherwise you could have permission problems.
+
 Previous to installing PetaLinux, it is neccesary to install a series of tools indicated in the [*Petalinux Tools Documentation. Reference Guide page: 10 *](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository.
 
 The istallation of these tools for an Ubuntu machine can be performed with the following command.
-
-> sudo apt-get install tofrodos iproute gawk make net-tools libncurses5-dev tftpd zlib1g:i386 libssl-dev flex bison libselinux1 gnupg wget diffstat chrpath socat xterm autoconf libtool tar unzip texinfo zlib1g-dev gcc-multilib build-essential screen pax gzip python
+```
+sudo apt-get install tofrodos iproute gawk make net-tools libncurses5-dev tftpd zlib1g:i386 libssl-dev flex bison libselinux1 gnupg wget diffstat chrpath socat xterm autoconf libtool tar unzip texinfo zlib1g-dev gcc-multilib build-essential screen pax gzip python
+```
 
 Once the installer file has been downloaded, create a directory where you want the PetaLinux Tools to be installed in. It is highly recommended to create this directory in a HDD disk, as installation needs 100 GB of space, although final space used goes down to 20 GB. Once you've created this folder, open a terminal in the directory the installer has been dowloaded to, likely *"Downloads"*, and introduce the following comands to give execution permision for the file and running the installer.
 
@@ -191,7 +143,9 @@ Once the installer file has been downloaded, create a directory where you want t
 
 In the directory part you shall enter the path to your PetaLinux folder in your computer, for example:
 
-> ./petalinux-v2019.2-final-installer.run media/hdd/PetaLinux
+```
+./petalinux-v2019.2-final-installer.run /home/PetaLinux
+```
 
 The completion of the installation requires the acceptance of the license agreement of the software itself, the WebPACK software and several third party software licenses as well.
 
@@ -204,8 +158,9 @@ PetaLinux configuration is performed following the [*Petalinux Tools Documentati
 First of all, Petalinux requires the usage of the 'bash' shell rather than the 'dash'. Bash is the Bourne-Once extra shell. Bash is a full-featured shell acceptable for interactive use. Bash a superset of POSIX efficiency. Dash is the Debian Almquist Shell. Dash implements the Single Unix Spec. Dash is for non-interactive script execution. Dash Only helps POSIX compliant choices.
 
 In order to stablish the bash as default, type on the command line the following.
-
-> sudo dpkg-reconfigure dash
+```
+sudo dpkg-reconfigure dash
+```
 
 After typing in the command, we are asked if we want to set up the 'dash' as our default shell, and we have to select *'NO'*.
 
@@ -215,14 +170,15 @@ After typing in the command, we are asked if we want to set up the 'dash' as our
 
 #### Source PetaLinux Tools
 The next thing to take care of will be to source the tools for PetaLinux to use within the terminal window. This includes the 'settings64.sh' and 'settings.sh' files in the Vivado and PetaLinux installation directories, respectively. To avoid typing the source commands into the shell every time, you can add a couple lines to the .bashrc script. To modify this system wide, we will use a text editor, atom, to modify the script. For Ubuntu, the bash.bashrc script is located in the /etc directory. The script can be easily openned with the following command. The 'atom' sentence can be switched for any other text editor installed in the system.
-
-> sudo atom /etc/bash.bashrc
+```
+sudo atom /home/.bashrc
+```
 
 Once the script is opened, add the two commands for sourcing the appropriate files. The path that is now idicated simply outlines where the 'settings.sh' and 'settings64.sh' files are located at.
-
-> source /media/hdd/PetaLinux/settings.sh
->
-> source /media/hdd/Xilinx/Vivado/2019.2/settings64.sh
+```
+source /media/hdd/PetaLinux/settings.sh
+source /media/hdd/Xilinx/Vivado/2019.2/settings64.sh
+```
 
 ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SourcePetaLinux.png)
 
@@ -238,16 +194,22 @@ The BSP provides a functioning Linux image for begginers with PetaLinux. In this
 The download of the BSP will start after identifying your user in the Xilinx web page. Once the download is performed, some aid can be found in the 'PetaLinux Documentation. Reference Guide. Page 16' to correctly install the BSP.
 
 First of all, make sure the previous configuration setup of PetaLinux has been carried out. Open a new terminal and access the directory you want your PetaLinux projects to be saved at, in our case the following.
+In order to avoid any kind of future problems, this directory should be created withing your `/home` directory.
 
-> cd /Desktop/TFM/PetaLinuxProjects
+```
+cd /Desktop/TFM/PetaLinuxProjects
+```
 
-Now, run the following comand, indicating the location of the BSP file that was just downloaded and making sure you uncompress this file first.
+Now, run the following command, indicating the location of the BSP file that was just downloaded and making sure you uncompress this file first.
 
 > petalinux-create -t project -s <'path-to-bsp'>
 
+
 In our case:
 
-> petalinux-create -t project -s /media/hdd/dl/avnet-digilent-zedboard-v2019.2-final.bsp
+```
+petalinux-create -t project -s /media/hdd/dl/avnet-digilent-zedboard-v2019.2-final.bsp
+```
 
 If you were to create a fresh project, without using a BSP, you type in the following command.
 
@@ -258,18 +220,21 @@ The type should not be changed, the template has to be the adecuate one for your
 #### Hardware Configuration
 First of all, it is neccesary to create a hardware configuration, which later you will have to export into a .xsa file. If you are using a BSP, in this guide, the Zedboard BSP, this file is created by default. You can find it in the following directory:
 
-`<directory_PetaLinux_projects_are_saved>/avnet-digilent-zedboard-2019.2/project-spec/hw-description/system.xsa`
+> < PetaLinux_project_directory >/project-spec/hw-description/system.xsa
+
 
 In our case, this directory would be:
 
-`/home/fcarp/Desktop/TFM/PetaLinuxProjects/avnet-digilent-zedboard-2019.2/project-spec/hw-description/system.xsa`
+```
+/home/fcarp/Desktop/TFM/PetaLinuxProjects/avnet-digilent-zedboard-2019.2/project-spec/hw-description/system.xsa
+```
 
 
 
 ### Importing Handware Configuration
-From the petalinux project directory, run the following comand, giving the path to the .xsa file.
+From the PetaLinux project directory, run the following comand, giving the path to the .xsa file.
 
-`petalinux-config --get-hw-description=<path-to-directory-containing-hardware description-file>`
+> petalinux-config --get-hw-description=< path-to-directory-containing-hardware description-file >
 
 In our case the directory we open the terminal on and the command are as follows.
 
@@ -283,11 +248,12 @@ There is a problem though, as when running this command in the PetaLinux Project
 
 In the case this happens to you, we recomend to make a copy of the 'system.xsa' file, and paste it inside the following directory.
 
-`<directory_PetaLinux_projects_are_saved>/project-spec/`
+> < directory_PetaLinux_projects_are_saved >/project-spec/
 
 If we now run the config command again, the terminal won't release the previous error.
-
-`petalinux-config --get-hw-description=project-spec/`
+```
+petalinux-config --get-hw-description=project-spec/
+```
 
 After executing the command, the following window is opened, and we have to select the 'Subsystem AUTO Hardware Settings'. For additional information of the 'Subsystem AUTO Hardware Settings' checkout [Petalinux Tools Documentation. Reference Guide. Page 99](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf).
 
@@ -300,20 +266,26 @@ After pressing the enter key, the configuration might take several minutes.
 ### Build a system image
 In the project directory, type in the following command.
 
-`petalinux-build`
+```
+petalinux-build
+```
 
 
 
 ### Generate the boot image
 This command should be run in the same directory than the previous, and it might take a bit of time as well. The last step would be to run the next command, and after its execution you should have the BOOT.bin and U-boot files ready to go.
 
-`petalinux-package --boot --fsbl <FSBL image> --fpga <FPGA bitstream> --u-boot`
+```
+petalinux-package --boot --fsbl <FSBL image> --fpga <FPGA bitstream> --u-boot
+```
 
 In order to correctly fill in the fields `FSBL image` and `FPGA bitstream`, we derive to the [PetaLinux Tools Documentation. Command Line Reference Guide. Page 20](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1157-petalinux-tools-command-line-guide.pdf). The following images highlingth the options that have to be selected according to the use of the zedboard. The command line for our case would be the following.
 
 ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/PetaLinux%20configuration%202.png)
 
-`petalinux-package --boot --force --fsbl ./images/linux/zynq_fsbl.elf --fpga ./images/linux/system.bit --u-boot`
+```
+petalinux-package --boot --force --fsbl ./images/linux/zynq_fsbl.elf --fpga ./images/linux/system.bit --u-boot
+```
 
 The `/images/linux/` is in the directory created by the command `petalinux-create` command, in this case, `/home/fcarp/Desktop/TFM/PetaLinuxProjects/avnet-digilent-zedboard-2019.2/`.
 
