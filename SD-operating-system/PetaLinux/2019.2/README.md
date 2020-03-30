@@ -23,6 +23,12 @@ Table of contents:
     - [Generate the boot image](#generate-the-boot-image)
     - [Configure SD card to boot PetaLinux](#configure-sd-card-to-boot-petalinux)
     - [Boot PetaLinux image on Hardware with an SD card](#boot-petalinux-image-on-hardware-with-an-sd-card)
+    - [Configure IP to connect to the board through SSH](#configure-ip-to-connect-to-the-board-through-ssh)
+    - [Add or remove packages from the PetaLinux image](#add-or-remove-packages-from-the-petalinux-image)
+  - [Connect to the board](#connect-to-the-board)
+    - [UART connection](#uart-connection)
+    - [SSH connection](#ssh-connection)
+    - [Copy a file to the board with SSH](#copy-a-file-to-the-board-with-ssh)
 
 Vivado SDK
 ----------
@@ -217,7 +223,7 @@ If you were to create a fresh project, without using a BSP, you type in the foll
 
 The type should not be changed, the template has to be the adecuate one for your board and finally the name can be chosen by you as well. This command though simply provides a folder structure for the projects. The actual build to use PetaLinux would have to be created by the user.
 
-#### Hardware Configuration
+##### Hardware Configuration
 First of all, it is neccesary to create a hardware configuration, which later you will have to export into a .xsa file. If you are using a BSP, in this guide, the Zedboard BSP, this file is created by default. You can find it in the following directory:
 
 > < PetaLinux_project_directory >/project-spec/hw-description/system.xsa
@@ -231,7 +237,7 @@ In our case, this directory would be:
 
 
 
-### Importing Handware Configuration
+#### Importing Handware Configuration
 From the PetaLinux project directory, run the following comand, giving the path to the .xsa file.
 
 > petalinux-config --get-hw-description=< path-to-directory-containing-hardware description-file >
@@ -263,7 +269,7 @@ After pressing the enter key, the configuration might take several minutes.
 
 
 
-### Build a system image
+#### Build a system image
 In the project directory, type in the following command.
 
 ```
@@ -272,7 +278,7 @@ petalinux-build
 
 
 
-### Generate the boot image
+#### Generate the boot image
 This command should be run in the same directory than the previous, and it might take a bit of time as well. The last step would be to run the next command, and after its execution you should have the BOOT.bin and U-boot files ready to go.
 
 ```
@@ -291,7 +297,7 @@ The `/images/linux/` is in the directory created by the command `petalinux-creat
 
 
 
-### Configure SD card to boot PetaLinux
+#### Configure SD card to boot PetaLinux
 First of all, we have to create two partitions in the SD card. In order to do this, we have used the utility fdisk. It is highly recommended though to use GParted if you are using a Linux machine, as it simplifies and speeds up the task.
  First of all we are going to see a list of all the disks in the device with the following comand.
 
@@ -410,7 +416,7 @@ sudo tar xvf rootfs.tar.gz -C /media/fcarp/RootFS
 
 
 
-### Boot PetaLinux image on Hardware with an SD card
+#### Boot PetaLinux image on Hardware with an SD card
 The procedure is specified in [Petalinux Tools Documentation. Reference Guide. Page 41](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf).
 
 Connect the Zedboard to the power and to the computer through the serial port with the micro USB cable.
@@ -422,3 +428,109 @@ Before powering on the board, set up the SD boot mode with the MIO Zedboard bank
 ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Boot%20PetaLinux%202.png)
 
 ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Boot%20PetaLinux%203.png)
+
+
+
+#### Configure IP to connect to the board
+
+The configuration of an IP address to directly connect to the board to your computer is really easy. First of all, you need to connect to the board through an UART connection, as explained [here](#uart-connection). Once you've entered the username and pasword, with the following command you will setup an IP in your board for the eth0 interface.
+
+```
+ifconfig eth0 192.168.0.1 netmask 255.255.255.0
+```
+
+In the case you don't want to always have to type in this command, you can create a *.sh* file with the previous command typed in it. After this you would only have to copy this file to the board using an IP connection as shown [here](#copy-a-file-to-the-board-with-ssh). Note while the *.sh* is not in the board you have to manually set up the IP, as shown before.
+
+Once the *.sh* file is copied to the board, next time you boot it, to setup the IP you only have to access the directory your file is stored at and run the following command.
+
+```
+./<file_name>.sh
+```
+
+
+
+#### Add or remove packages from the PetaLinux image
+
+
+
+### Connect to the board
+
+This section of the guide is focused on showing some of the different processes you could use to connect to the board running PetaLinux through an SD card.
+
+
+
+#### UART connection
+
+This example was carried out using a ZedBoard, which uses a Zynq-7000 chip from Xilinx. In order to connect to the board, we used a computer running Ubuntu 18.04 LTS with the software `Putty` installed. It is also neccesary to have the power cable for the board and a micro-usb cable connected to the UART connector in the board, which in this case is the *J14* connector. The image shows how to easily make this connections.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Boot%20PetaLinux%203.png)
+
+In order to use `Putty`, we need to know what computer USB port is the board being connected to. The easiest way arroud to do this is accessing the following directory with your computer's console and running the following command.
+
+```
+cd /dev/
+
+ls
+```
+
+The `ls` command should print all the ports within this directory. Now, power on the board, and connect it to one of the USB ports of the computer. Once this is done, run the `ls` command again. Now, the command should print one additional name. This would be the USB's port name. In our case, the name of the USB port would be `ttyACM0`.
+You can now power off the board and open `Putty`. We configure the connection as shown in the next image, selecting a serial connection, with a baud rate of 115200 and the directory where the board is connected to `/dev/ttyACM0`.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/Putty_Serial.png)
+
+Once the configuration is set, power on the board, making sure it is correctly connected to the computer, and click the *Open* button. If there is any kind of problem open Putty again and repeat the proccess a couple of times until you get a console window opened. I you still cannot open the connection, you might have to go to a new console, and open putty using the root permissions.
+
+```
+sudo putty
+```
+
+After this, repeat the previous process. Once the connection is done, you should see the board booting. If you just see a black console, press any key and type in `boot`. After this the board should reboot.
+
+Once the board has correctly booted, it'll ask for the user name `root` and the pass `root` as well.
+The next picture ilustrates the result you should get if connected properly.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/UART_console.png)
+
+
+
+#### SSH connections
+
+The first step to establish a SSH connection with the board is to configure an IP address for the board, as shown [here](#configure-ip-to-connect-to-the-board).
+Once the board is setup, you have to go to your network settings, and establish a manual IPv4 as shown in the following figure.
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/ethernet_connection.png)
+
+As you can see, the netmask is the same given to the board and the IP has to be in the same range as the one assigned to the board.
+
+Once the network is applied, you can ping the board to see if you can connect.
+
+```
+ping 192.168.0.1
+```
+
+If the connection works, the last step would be to create the SSH connection. You can use `PuTTy` or other software. We are directly going to create the connection through the terminal typing in the following.
+
+```
+ssh root@192.168.0.1
+```
+
+After this, you will get asked the username, which is `root` and the password, which is the same.
+
+
+
+#### Copy a file to the board with SSH
+
+Previously, you have to create an SSH connection as shown [here](#ssh-connection).
+Now, open a new terminal and introduce the follwing command changing the file directory you want to copy for yours and introducing the IP of your board.
+
+```
+scp -r <file_directory>/file.* root@<your_board_IP>
+```
+
+As an example we have copied the following file to our board.
+
+```
+scp -r /media/arroas/HDD/MinhasCousas/EEI/Mestrado/2º_Curso/TFM/Zynq7000-examples/Useful-scripts/ip_address_assign.sh root@192.168.0.1:~/
+```
+
+This command copies the file ip_address_assign.sh to the /home/root directory of the board.
