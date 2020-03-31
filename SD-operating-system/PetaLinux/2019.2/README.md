@@ -24,7 +24,7 @@ Table of contents:
     - [Configure SD card to boot PetaLinux](#configure-sd-card-to-boot-petalinux)
     - [Boot PetaLinux image on Hardware with an SD card](#boot-petalinux-image-on-hardware-with-an-sd-card)
     - [Configure IP to connect to the board through SSH](#configure-ip-to-connect-to-the-board-through-ssh)
-    - [Add or remove packages from the PetaLinux image](#add-or-remove-packages-from-the-petalinux-image)
+    - [Add libraries to PetaLinux image](#add-libraries-to-petalinux-image)
   - [Connect to the board](#connect-to-the-board)
     - [UART connection](#uart-connection)
     - [SSH connection](#ssh-connection)
@@ -449,7 +449,15 @@ Once the *.sh* file is copied to the board, next time you boot it, to setup the 
 
 
 
-#### Add or remove packages from the PetaLinux image
+#### Add libraries to PetaLinux image
+
+The addition of supported libraries is done with the following command:
+
+```
+petalinux-config -c rootfs
+```
+
+The libraries that are not available can be added precompiled (.so file) or its source added and it will be compiled during Petalinux compilation.
 
 
 
