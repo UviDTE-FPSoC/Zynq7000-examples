@@ -16,7 +16,7 @@ Table of contents:
   - [Configuration](#configuration)
     - [Bash or Dash](#bash-or-dash)
     - [Source PetaLinux Tools](#source-petalinux-tools)
-    - [Creating a Project with the Board Support Package BSP](#creating-a-project-with-the-board-support-package)
+    - [Creating a Project with the Board Support Package](#creating-a-project-with-the-board-support-package)
     - [Hardware Configuration](#hardware-configuration)
     - [Importing Hardware Configuration](#importing-hardware-configuration)
     - [Build a system image](#build-a-system-image)
@@ -192,7 +192,7 @@ With the two lines added, save the changes and close the editor.
 
 
 
-#### Creating a Project with the Board Support Package BSP
+#### Creating a Project with the Board Support Package
 The BSP provides a functioning Linux image for begginers with PetaLinux. In this case, to download the BSP for the Zedboard, [clik here](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html).
 
 ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/BSP%20download.png)
