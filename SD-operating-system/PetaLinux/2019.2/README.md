@@ -457,7 +457,12 @@ The addition of supported libraries is done with the following command:
 petalinux-config -c rootfs
 ```
 
+Once you have found the file you want to install, you have to press the key [Y] to add it or [N] to remove it.
+
 The libraries that are not available can be added precompiled (.so file) or its source added and it will be compiled during Petalinux compilation.
+
+After any library addition, you should build again your project, generate the operating system image and copy them again in the SD card.
+
 
 
 
