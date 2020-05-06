@@ -21,7 +21,8 @@ Table of contents:
     - [Importing Hardware Configuration](#importing-hardware-configuration)
     - [Build a system image](#build-a-system-image)
     - [Generate the boot image](#generate-the-boot-image)
-    - [Configure SD card to boot PetaLinux](#configure-sd-card-to-boot-petalinux)
+    - [Create the SD card partitions](#create-the-sd-card-partitions)
+    - [Configure PetaLinux to boot with SD card](#configure-petalinux-to-boot-with-sd-card)
     - [Boot PetaLinux image on Hardware with an SD card](#boot-petalinux-image-on-hardware-with-an-sd-card)
     - [Configure IP to connect to the board through SSH](#configure-ip-to-connect-to-the-board-through-ssh)
     - [Add libraries to PetaLinux image](#add-libraries-to-petalinux-image)
@@ -50,7 +51,7 @@ Enable the exectuion of this file with the following command, and execute it:
 
 > chmod +x 'file_name'.bin
 >
-> ./ 'filename'.bin
+> sudo ./'filename'.bin
 
 The last command starts runnin the installer of the SDK. On the first pop-up window, some information about the operating systems that support this software is handed out. Your Ubuntu release has to be 16.04.5 or higher in order to install the 2019.2 version.
 Click next and in the next window the information of your account will be required.
@@ -85,7 +86,7 @@ sudo ./instal_drivers
 
 ### Xilinx Runtime XRT Installation
 The installation of the XRT should be performed if using a chip of the family Zynq UltraScale+ MPSoC-based, as it is implemented as a combination of user-space and kernel driver components. If you are using a chip from another family, it also provides a software interface to Xilinx programmable logic devices.
-The steps to install the package are followed from [*Vitis Unified Software Platform Documentation. Embedded Software Development. Page: 19*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1400-vitis-embedded.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository just in case new versions of the Xilinx guide are uploaded.
+The steps to install the package are followed from [*Vitis Unified Software Platform Documentation. Embedded Software Development. Page: 17*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1400-vitis-embedded.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository just in case new versions of the Xilinx guide are uploaded.
 To download the DEV file for Linux 16.04 [click here](https://www.xilinx.com/bin/public/openDownload?filename=xrt_201920.2.3.1301_16.04-xrt.deb). If you have other Linux versions, go to the documentation page before mentioned.
 
 Once the packet has been downloaded, type in the following command to install it.
@@ -98,22 +99,28 @@ Once the packet has been downloaded, type in the following command to install it
 
 In our case, the full command line would look like this.
 
-> sudo apt install /media/hdd/dl/xrt_201920.2.3.1301_16.04-xrt.deb
+```
+sudo apt install /media/hdd/dl/xrt_201920.2.3.1301_16.04-xrt.deb
+```
 
 #### Source XRT
-The next thing to take care of will be to set up the environment to run the Vitis Software Platform. The set up procedure is followed from the [*Vitis Unified Software Platform Documentation. Embedded Software Development. Page: 21*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1400-vitis-embedded.pdf).
+The next thing to take care of will be to set up the environment to run the Vitis Software Platform. The set up procedure is followed from the [*Vitis Unified Software Platform Documentation. Embedded Software Development. Page: 19*](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1400-vitis-embedded.pdf).
 
 This includes sourcing the 'settings64.sh' and 'setup.sh' files in the Vitis and Xilinx XRT installation directories, respectively. To avoid needing to type the source commands into the shell every time we want to use the tools, you can add a couple lines to the .bashrc script. To modify this system wide, we will use a text editor, atom, to modify the script. For Ubuntu, the bash.bashrc script is located in the /etc directory. The script can be easily openned with the following command. The 'atom' sentence can be switched for any other text editor installed in the system.
 
-> sudo atom /home/.bashrc
+```
+sudo atom /home/.bashrc
+```
 
 Once the script is opened, add the two commands for sourcing the appropriate files. The path that is now idicated simply outlines where the 'settings.sh' and 'settings64.sh' files are located at.
 
-> source /media/hdd/Xilinx/Vitis/2019.2/settings64.sh
->
-> source /opt/xilinx/xrt/setup.sh
+```
+source /media/hdd/Xilinx/Vitis/2019.2/settings64.sh
 
-![alt text](hhttps://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SourceXRT.png)
+source /opt/xilinx/xrt/setup.sh
+```
+
+![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SourceXRT.png)
 
 
 
@@ -134,14 +141,17 @@ In order to install PetaLinux in your device, it is very important to download t
 It is also very important to make sure that the file system of the operating system in your computer, Ubuntu 16.04 LTS in this case, hasn't been encrypted. One option to decrypt it would be to reinstall the SO in you computer.
 Finally, make sure the PetaLinux installation directory is within `home`, as otherwise you could have permission problems.
 
-Previous to installing PetaLinux, it is neccesary to install a series of tools indicated in the [*Petalinux Tools Documentation. Reference Guide page: 10 *](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository.
+Previous to installing PetaLinux, it is neccesary to install a series of tools indicated in the [Petalinux Tools Documentation. Reference Guide page: 10](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf). There is a copy of this document uploaded in the *"Xilinx Guide"* folder of this repository.
 
-The istallation of these tools for an Ubuntu machine can be performed with the following command.
+The installation of these tools for an Ubuntu machine can be performed with the following command.
+
 ```
 sudo apt-get install tofrodos iproute gawk make net-tools libncurses5-dev tftpd zlib1g:i386 libssl-dev flex bison libselinux1 gnupg wget diffstat chrpath socat xterm autoconf libtool tar unzip texinfo zlib1g-dev gcc-multilib build-essential screen pax gzip python
 ```
 
-Once the installer file has been downloaded, create a directory where you want the PetaLinux Tools to be installed in. It is highly recommended to create this directory in a HDD disk, as installation needs 100 GB of space, although final space used goes down to 20 GB. Once you've created this folder, open a terminal in the directory the installer has been dowloaded to, likely *"Downloads"*, and introduce the following comands to give execution permision for the file and running the installer.
+If the package `iproute` gives any trouble when installing, you can switch this package for `iproute2`.
+
+Once the installer file has been downloaded, create a directory where you want the PetaLinux Tools to be installed in. It is highly recommended to create this directory in `/home`, as the installation needs special permissions. The space required by PetaLinux is around 20 GB. Once you've created this folder, open a terminal in the directory the installer has been downloaded to, likely *"Downloads"*, and introduce the following commands to give execution permission for the file and running the installer.
 
 > chmod +x 'name_of_the_file'.run
 >
@@ -150,7 +160,7 @@ Once the installer file has been downloaded, create a directory where you want t
 In the directory part you shall enter the path to your PetaLinux folder in your computer, for example:
 
 ```
-./petalinux-v2019.2-final-installer.run /home/PetaLinux
+./petalinux-v2019.2-final-installer.run /home/arroas/PetaLinux
 ```
 
 The completion of the installation requires the acceptance of the license agreement of the software itself, the WebPACK software and several third party software licenses as well.
@@ -182,7 +192,7 @@ sudo atom /home/.bashrc
 
 Once the script is opened, add the two commands for sourcing the appropriate files. The path that is now idicated simply outlines where the 'settings.sh' and 'settings64.sh' files are located at.
 ```
-source /media/hdd/PetaLinux/settings.sh
+source /home/arroas/PetaLinux/settings.sh
 source /media/hdd/Xilinx/Vivado/2019.2/settings64.sh
 ```
 
@@ -297,8 +307,8 @@ The `/images/linux/` is in the directory created by the command `petalinux-creat
 
 
 
-#### Configure SD card to boot PetaLinux
-First of all, we have to create two partitions in the SD card. In order to do this, we have used the utility fdisk. It is highly recommended though to use GParted if you are using a Linux machine, as it simplifies and speeds up the task.
+#### Create the SD card partitions
+First of all, we have to create two partitions in the SD card. In order to do this, we have used the utility `fdisk`. It is highly recommended to use `GParted` though , specially if you are using a Linux machine, as it simplifies and speeds up the task.
  First of all we are going to see a list of all the disks in the device with the following comand.
 
  `sudo fdisk -l`
@@ -361,6 +371,9 @@ sudo e2label /dev/sdc2 RootFS
 
 ![alt text](https://raw.githubusercontent.com/UviDTE-FPSoC/Zynq7000-examples/master/SD-operating-system/PetaLinux/2019.2/GuideImages/SD%20card%20setup%209.png)
 
+
+
+#### Configure PetaLinux to boot with SD card
 The files that we now have to save on each partition are specified in [Petalinux Tools Documentation. Reference Guide. Page 65](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug1144-petalinux-tools-reference-guide.pdf).
 
 In order to boot PetaLinux with the SD card, we need to make a couple of changes to the configuration. Get into the PetaLinux project directory, and insert the following comands.
