@@ -93,9 +93,9 @@ Once the packet has been downloaded, type in the following command to install it
 
 > sudo apt install <'deb-dir'>/<'xrt_filename_OS'>.deb
 >
->> *<'deb-dir'>* : Path to the directory where the '.deb' file was downloaded to
+> - *<'deb-dir'>* : Path to the directory where the '.deb' file was downloaded to
 >
->>*<'xrt_filename_OS'>* : Name of the file
+> - *<'xrt_filename_OS'>* : Name of the file
 
 In our case, the full command line would look like this.
 
