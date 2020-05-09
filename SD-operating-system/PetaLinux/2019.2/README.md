@@ -519,7 +519,7 @@ The next picture ilustrates the result you should get if connected properly.
 
 
 
-#### SSH connections
+#### SSH connection
 
 The first step to establish a SSH connection with the board is to configure an IP address for the board, as shown [here](#configure-ip-to-connect-to-the-board).
 Once the board is setup, you have to go to your network settings, and establish a manual IPv4 as shown in the following figure.
