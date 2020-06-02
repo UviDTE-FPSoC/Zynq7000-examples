@@ -425,7 +425,17 @@ sudo tar xvf rootfs.tar.gz -C /media/fcarp/RootFS
 
 ```
 
-> *NOTE*: The previous commands copy this files to the previously created partitions, which are accesible from the /media/fcarp/ directory in our case. This directory can change on other devices.
+Once all the files have been copied to you board, execute the `sync` command and unmount you partitions to make sure no data is lost by the SD card. This is an important step, as it is possible to get weird errors if any files are lost from any of the partitions.
+
+```
+$ sync
+
+$ sudo umount -l /media/fcarp/BOOT/
+
+$ sudo umount -l /media/fcarp/RootFS/
+```
+
+> NOTE: The previous commands copy this files to the previously created partitions, which are accesible from the /media/fcarp/ directory in our case. This directory can change on other devices.
 
 
 
